@@ -13,7 +13,7 @@
         android:contentDescription="@string/description_post_author_avatar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompact="@sample/posts_avatars" />
+        tools:srcCompact="@@sample/posts_avatars" />
 
 
 
