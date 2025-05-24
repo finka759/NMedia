@@ -2,6 +2,4 @@
 <resources>
     <string name="app_name">НМедиа</string>
     <string name="nmedia">НМедиа!</string>
-    <string name="description_post_author_avatar">Аватар автора поста</string>
-    <string name="description_post_menu">меню описания поста</string>
 </resources>
