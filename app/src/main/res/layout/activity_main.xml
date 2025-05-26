@@ -12,14 +12,14 @@
         android:id="@+id/avatar"
         android:layout_width="@dimen/posts_avatar_size"
         android:layout_height="@dimen/posts_avatar_size"
+        android:layout_marginBottom="@dimen/common_spacing"
         android:contentDescription="@string/description_post_author_avatar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:srcCompat="@sample/posts_avatars" />
-
+        tools:srcCompat="@sample/posts.json/data/authorAvatar" />
 
     <TextView
-        android:id="@+id/athor"
+        android:id="@+id/author"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -29,6 +29,7 @@
         app:layout_constraintEnd_toStartOf="@id/more"
         app:layout_constraintStart_toEndOf="@id/avatar"
         app:layout_constraintTop_toTopOf="@id/avatar"
+        app:layout_constraintVertical_chainStyle="packed"
         tools:text="@sample/posts.json/data/author" />
 
     <TextView
@@ -38,7 +39,7 @@
         android:layout_marginStart="@dimen/common_spacing"
         app:layout_constraintBottom_toBottomOf="@id/avatar"
         app:layout_constraintStart_toEndOf="@id/avatar"
-        app:layout_constraintTop_toBottomOf="@id/athor"
+        app:layout_constraintTop_toBottomOf="@id/author"
         app:layout_constraintVertical_bias="1.0"
         tools:text="@sample/posts.json/data/published" />
 
@@ -49,9 +50,9 @@
         android:background="@android:color/transparent"
         android:contentDescription="@string/description_post_menu"
         android:src="@drawable/baseline_more_vert_24"
-        app:layout_constraintBottom_toBottomOf="@id/athor"
+        app:layout_constraintBottom_toBottomOf="@id/author"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/athor" />
+        app:layout_constraintTop_toTopOf="@+id/author" />
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/barrier"
@@ -79,7 +80,7 @@
         app:barrierDirection="bottom"
         app:constraint_referenced_ids="content" />
 
-    <ImageView
+    <ImageButton
         android:id="@+id/favorite_border"
         android:layout_width="24dp"
         android:layout_height="24dp"
@@ -95,7 +96,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/favorite_border"
         app:layout_constraintStart_toEndOf="@+id/favorite_border"
         app:layout_constraintTop_toTopOf="@+id/favorite_border"
-        tools:text="@sample/posts.json/data/like_count" />
+        tools:text="@sample/posts.json/data/likeCount" />
 
     <ImageView
         android:id="@+id/share"
@@ -116,17 +117,17 @@
         app:layout_constraintBottom_toBottomOf="@+id/share"
         app:layout_constraintStart_toEndOf="@+id/share"
         app:layout_constraintTop_toTopOf="@+id/share"
-        tools:text="@sample/posts.json/data/share_count" />
+        tools:text="@sample/posts.json/data/shareCount" />
 
 
     <TextView
-        android:id="@+id/views_count"
+        android:id="@+id/view_count"
         android:layout_width="25dp"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="@+id/views"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/views"
-        tools:text="@sample/posts.json/data/view_count" />
+        tools:text="@sample/posts.json/data/viewCount" />
 
     <ImageView
         android:id="@+id/views"
@@ -136,7 +137,7 @@
         android:contentDescription="@string/favorite"
         android:src="@drawable/baseline_remove_red_eye_24"
         app:layout_constraintBottom_toBottomOf="@+id/share_count"
-        app:layout_constraintEnd_toStartOf="@+id/views_count"
+        app:layout_constraintEnd_toStartOf="@+id/view_count"
         app:layout_constraintTop_toTopOf="@+id/share_count" />
 
 
