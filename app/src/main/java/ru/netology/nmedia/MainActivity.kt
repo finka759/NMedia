@@ -3,6 +3,8 @@ package ru.netology.nmedia
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import ru.netology.nmedia.databinding.ActivityMainBinding
 import ru.netology.nmedia.dto.Post
 import java.util.Locale
@@ -11,14 +13,14 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = ActivityMainBinding.inflate(layoutInflater)
-//        enableEdgeToEdge()
+        enableEdgeToEdge()
         setContentView(binding.root)
 
-        //        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-//            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-//            insets
-//        }
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
         fun getStrViewFromInt(i: Int): String {
             return if (i < 1000) {
                 i.toString()
@@ -67,14 +69,10 @@ class MainActivity : AppCompatActivity() {
                     }
                 )
             }
-
-
             share.setOnClickListener {
                 post.shareCount += 1
                 shareCount.text = getStrViewFromInt(post.shareCount)
             }
-
-
         }
     }
 }
