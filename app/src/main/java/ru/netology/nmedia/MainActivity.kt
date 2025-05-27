@@ -8,7 +8,6 @@ import androidx.core.view.WindowInsetsCompat
 import getStrViewFromInt
 import ru.netology.nmedia.databinding.ActivityMainBinding
 import ru.netology.nmedia.dto.Post
-import java.math.RoundingMode
 
 
 class MainActivity : AppCompatActivity() {
@@ -68,3 +67,4 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
+
