@@ -5,6 +5,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import getStrViewFromInt
 import ru.netology.nmedia.databinding.ActivityMainBinding
 import ru.netology.nmedia.dto.Post
 import java.math.RoundingMode
@@ -65,17 +66,5 @@ class MainActivity : AppCompatActivity() {
                 shareCount.text = getStrViewFromInt(post.shareCount)
             }
         }
-    }
-}
-
-fun getStrViewFromInt(i: Int): String {
-    return if (i < 1000) {
-        i.toString()
-    } else if (i < 10000) {
-        "%.1f K".format(i / 100 / 10.0, RoundingMode.DOWN)
-    } else if (i < 1_000_000) {
-        (i / 1000).toString() + "K"
-    } else {
-        "%.1f M".format(i / 100000 / 10.0, RoundingMode.DOWN)
     }
 }
