@@ -34,7 +34,9 @@ android {
 }
 
 dependencies {
-
+//    def arch_version = "2.1.0"
+//    def lifecycle_version = "2.3.0"
+//    def activity_version = "2.1.0"
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
     implementation libs.material
@@ -43,4 +45,11 @@ dependencies {
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit
     androidTestImplementation libs.androidx.espresso.core
+    implementation libs.androidx.lifecycle.viewmodel.ktx
+    implementation libs.androidx.lifecycle.livedata.ktx
+    testImplementation libs.androidx.core.testing
+//    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+//    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
+//    testImplementation "androidx.arch.core:core-testing:$arch_version"
+//    implementation "androidx.activity:activity-ktx:$activity_version"
 }
