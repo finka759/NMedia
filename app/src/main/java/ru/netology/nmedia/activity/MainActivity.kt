@@ -1,14 +1,12 @@
-package ru.netology.nmedia
+package ru.netology.nmedia.activity
 
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import getStrViewFromInt
+import ru.netology.nmedia.viewmodel.PostViewModel
+import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.ActivityMainBinding
-import ru.netology.nmedia.dto.Post
 
 
 class MainActivity : AppCompatActivity() {
@@ -36,17 +34,10 @@ class MainActivity : AppCompatActivity() {
                 likeCount.text = getStrViewFromInt(post.likeCount)
                 shareCount.text = getStrViewFromInt(post.shareCount)
                 viewCount.text = post.viewCount.toString()
-//                if (post.likeByMe) {
-//                    favoriteBorder.setImageResource(R.drawable.baseline_favorite_24)
-//                }
                 favoriteBorder.setImageResource(
                     if (post.likeByMe) {
-                        post.likeCount += 1
-                        likeCount.text = getStrViewFromInt(post.likeCount)
                         R.drawable.baseline_favorite_24
                     } else {
-                        post.likeCount -= 1
-                        likeCount.text = getStrViewFromInt(post.likeCount)
                         R.drawable.baseline_favorite_border_24
                     }
                 )
@@ -54,24 +45,10 @@ class MainActivity : AppCompatActivity() {
 
             binding.favoriteBorder.setOnClickListener {
                 viewModel.like()
-//                post.likeByMe = !post.likeByMe
-//
-//                favoriteBorder.setImageResource(
-//                    if (post.likeByMe) {
-//                        post.likeCount += 1
-//                        likeCount.text = getStrViewFromInt(post.likeCount)
-//                        R.drawable.baseline_favorite_24
-//                    } else {
-//                        post.likeCount -= 1
-//                        likeCount.text = getStrViewFromInt(post.likeCount)
-//                        R.drawable.baseline_favorite_border_24
-//                    }
-//                )
             }
-//            binding.share.setOnClickListener {
-//                post.shareCount += 1
-//                shareCount.text = getStrViewFromInt(post.shareCount)
-//            }
+            binding.share.setOnClickListener {
+                viewModel.share()
+            }
         }
     }
 }

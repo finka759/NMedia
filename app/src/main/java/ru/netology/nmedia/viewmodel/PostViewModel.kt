@@ -1,4 +1,4 @@
-package ru.netology.nmedia
+package ru.netology.nmedia.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
@@ -11,4 +11,5 @@ class PostViewModel: ViewModel() {
 
     val data: LiveData<Post> = repository.get()
     fun like() = repository.like()
+    fun share() = repository.share()
 }
