@@ -6,9 +6,10 @@ import ru.netology.nmedia.dto.Post
 
 class PostRepositoryInMemoryImpl : PostRepository {
 
+    private var nextId = 1L
     private var posts = listOf(
         Post(
-            id = 1,
+            id = nextId++,
             author = "Нетология. Университет интернет-профессий будущего",
             published = "21 мая в 18:36",
             content = "Привет, это новая Нетология! Когда-то Нетология начиналась с интенсивов по онлайн-маркетингу. Затем появились курсы по дизайну, разработке, аналитике и управлению. Мы растём сами и помогаем расти студентам: от новичков до уверенных профессионалов. Но самое важное остаётся с нами: мы верим, что в каждом уже есть сила, которая заставляет хотеть больше, целиться выше, бежать быстрее. Наша миссия — помочь встать на путь роста и начать цепочку перемен → http://netolo.gy/fyb",
@@ -18,7 +19,7 @@ class PostRepositoryInMemoryImpl : PostRepository {
             viewCount = 5,
         ),
         Post(
-            id = 2,
+            id = nextId++,
             author = "2 Нетология. Университет интернет-профессий будущего 2",
             published = "22 мая в 18:36",
             content = "2 Привет, это новая Нетология! Когда-то Нетология начиналась с интенсивов по онлайн-маркетингу. Затем появились курсы по дизайну, разработке, аналитике и управлению. Мы растём сами и помогаем расти студентам: от новичков до уверенных профессионалов. Но самое важное остаётся с нами: мы верим, что в каждом уже есть сила, которая заставляет хотеть больше, целиться выше, бежать быстрее. Наша миссия — помочь встать на путь роста и начать цепочку перемен → http://netolo.gy/fyb 2",
@@ -28,7 +29,7 @@ class PostRepositoryInMemoryImpl : PostRepository {
             viewCount = 2,
         ),
         Post(
-            id = 3,
+            id = nextId++,
             author = "3 Нетология. Университет интернет-профессий будущего3 ",
             published = "23 мая в 18:36",
             content = "3 Привет, это новая Нетология! Когда-то Нетология начиналась с интенсивов по онлайн-маркетингу. Затем появились курсы по дизайну, разработке, аналитике и управлению. Мы растём сами и помогаем расти студентам: от новичков до уверенных профессионалов. Но самое важное остаётся с нами: мы верим, что в каждом уже есть сила, которая заставляет хотеть больше, целиться выше, бежать быстрее. Наша миссия — помочь встать на путь роста и начать цепочку перемен → http://netolo.gy/fyb",
@@ -38,7 +39,7 @@ class PostRepositoryInMemoryImpl : PostRepository {
             viewCount = 31,
         ),
         Post(
-            id = 4,
+            id = nextId++,
             author = "4 Нетология. Университет интернет-профессий будущего 4",
             published = "24 мая в 18:36",
             content = "4 Привет, это новая Нетология! Когда-то Нетология начиналась с интенсивов по онлайн-маркетингу. Затем появились курсы по дизайну, разработке, аналитике и управлению. Мы растём сами и помогаем расти студентам: от новичков до уверенных профессионалов. Но самое важное остаётся с нами: мы верим, что в каждом уже есть сила, которая заставляет хотеть больше, целиться выше, бежать быстрее. Наша миссия — помочь встать на путь роста и начать цепочку перемен → http://netolo.gy/fyb 2",
@@ -48,7 +49,7 @@ class PostRepositoryInMemoryImpl : PostRepository {
             viewCount = 4,
         ),
 
-    )
+        )
 
     private val data = MutableLiveData(posts)
 
@@ -80,5 +81,39 @@ class PostRepositoryInMemoryImpl : PostRepository {
         }
         data.value = posts
     }
+
+    override fun removeById(id: Long) {
+        posts = posts.filter { it.id != id }
+        data.value = posts
+    }
+
+    override fun save(post: Post) {
+        if (post.id == 0L) {
+            posts = listOf(
+                post.copy(
+                    id = nextId++,
+                    author = "Me",
+                    likeByMe = false,
+                    published = "now"
+                )
+            ) + posts
+            data.value = posts
+            return
+        }
+//        else {
+//            posts = posts.map {
+//                if (post.id == it.id) {
+//                    it.copy(content = post.content)
+//                } else it
+//            }
+//        }
+
+        posts = posts.map {
+            if (it.id != post.id) it else it.copy(content = post.content)
+        }
+        data.value = posts
+    }
+
+
 
 }
