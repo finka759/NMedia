@@ -17,10 +17,10 @@ import ru.netology.nmedia.dto.Post
 //typealias OnRemoveListener = (post: Post) -> Unit
 
 interface OnInteractorListener {
-    fun OnLike(post: Post)
-    fun OnShare(post: Post)
-    fun OnRemove(post: Post)
-    fun OnEdit(post: Post)
+    fun onLike(post: Post)
+    fun onShare(post: Post)
+    fun onRemove(post: Post)
+    fun onEdit(post: Post)
 }
 
 class PostAdapter(
@@ -64,11 +64,11 @@ class PostViewHolder(
             }
         )
         favoriteBorder.setOnClickListener {
-            onInteractorListener.OnLike(post)
+            onInteractorListener.onLike(post)
 //            onLikeListener(post)
         }
         share.setOnClickListener {
-            onInteractorListener.OnShare(post)
+            onInteractorListener.onShare(post)
 //            onShareListener(post)
         }
         more.setOnClickListener {
@@ -77,20 +77,20 @@ class PostViewHolder(
                 setOnMenuItemClickListener { item ->
                     when (item.itemId) {
                         R.id.remove -> {
-                            onInteractorListener.OnRemove(post)
+                            onInteractorListener.onRemove(post)
 //                            onRemoveListener(post)
                             true
                         }
-                        R.id.remove -> {
-                            onInteractorListener.OnEdit(post)
+                        R.id.edit -> {
+                            onInteractorListener.onEdit(post)
                             true
                         }
-
                         else -> false
                     }
                 }
             }.show()
         }
+
     }
 }
 

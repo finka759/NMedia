@@ -1,6 +1,7 @@
 package ru.netology.nmedia.activity
 
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -21,30 +22,31 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+//        enableEdgeToEdge()
         val binding = ActivityMainBinding.inflate(layoutInflater)
+        binding.groupForEdit.visibility = View.GONE
         setContentView(binding.root)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
+//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+//            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+//            insets
+//        }
 
         val viewModel: PostViewModel by viewModels()
         val adapter = PostAdapter(object : OnInteractorListener {
-            override fun OnLike(post: Post) {
+            override fun onLike(post: Post) {
                 viewModel.like(post.id)
             }
 
-            override fun OnShare(post: Post) {
+            override fun onShare(post: Post) {
                 viewModel.share(post.id)
             }
 
-            override fun OnRemove(post: Post) {
+            override fun onRemove(post: Post) {
                 viewModel.removeById(post.id)
             }
 
-            override fun OnEdit(post: Post) {
+            override fun onEdit(post: Post) {
                 viewModel.edit(post)
             }
 
@@ -67,11 +69,14 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.edited.observe(this) { post ->
             if (post.id != 0L) {
+                binding.groupForEdit.visibility = View.VISIBLE
+                binding.editMessageTextContent.text = post.content
                 with(binding.content) {
-//                    requestFocus()
-                    focusAndShowKeyboard()
+                    requestFocus()
+//                    focusAndShowKeyboard()
                     setText(post.content)
                 }
+
 
             }
         }
@@ -90,6 +95,13 @@ class MainActivity : AppCompatActivity() {
                 viewModel.save()
                 content.setText("")
                 content.clearFocus()
+                binding.groupForEdit.visibility = View.GONE
+                AndroidUtils.hideKeyboard(it)
+            }
+            closeEditButton.setOnClickListener {
+                content.setText("")
+                content.clearFocus()
+                binding.groupForEdit.visibility = View.GONE
                 AndroidUtils.hideKeyboard(it)
             }
         }

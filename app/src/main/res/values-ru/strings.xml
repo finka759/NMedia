@@ -10,4 +10,5 @@
     <string name="post_text" >Текст поста</string>
     <string name="error_empty_content">Контент не может быть пустым</string>
     <string name="description_post_save">Сохранить пост</string>
+    <string name="edit_message">Редактирование Сообщения</string>
 </resources>
