@@ -7,7 +7,7 @@ import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.repository.PostRepository
 import ru.netology.nmedia.repository.PostRepositoryInMemoryImpl
 
-private val empty = Post(
+internal val empty = Post(
     id = 0,
     author = "",
     content = "",

@@ -16,6 +16,7 @@ import ru.netology.nmedia.databinding.ActivityMainBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.util.AndroidUtils
 import ru.netology.nmedia.util.focusAndShowKeyboard
+import ru.netology.nmedia.viewmodel.empty
 
 
 class MainActivity : AppCompatActivity() {
@@ -99,6 +100,7 @@ class MainActivity : AppCompatActivity() {
                 AndroidUtils.hideKeyboard(it)
             }
             closeEditButton.setOnClickListener {
+                viewModel.edited.value = empty
                 content.setText("")
                 content.clearFocus()
                 binding.groupForEdit.visibility = View.GONE
