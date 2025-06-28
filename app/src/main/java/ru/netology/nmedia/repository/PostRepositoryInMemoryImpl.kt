@@ -97,8 +97,6 @@ class PostRepositoryInMemoryImpl : PostRepository {
                     published = "now"
                 )
             ) + posts
-//            data.value = posts
-//            return
         } else {
             posts.map {
                 if (post.id == it.id) {
@@ -106,10 +104,6 @@ class PostRepositoryInMemoryImpl : PostRepository {
                 } else it
             }
         }
-
-//        posts = posts.map {
-//            if (it.id != post.id) it else it.copy(content = post.content)
-//        }
         data.value = posts
     }
 

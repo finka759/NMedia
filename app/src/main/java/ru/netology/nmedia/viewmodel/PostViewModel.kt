@@ -7,7 +7,7 @@ import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.repository.PostRepository
 import ru.netology.nmedia.repository.PostRepositoryInMemoryImpl
 
-internal val empty = Post(
+private val empty = Post(
     id = 0,
     author = "",
     content = "",
@@ -16,7 +16,7 @@ internal val empty = Post(
     likeByMe = false
 )
 
-class PostViewModel: ViewModel() {
+class PostViewModel : ViewModel() {
     private val repository: PostRepository = PostRepositoryInMemoryImpl()
 
     val data: LiveData<List<Post>> = repository.get()
@@ -25,10 +25,10 @@ class PostViewModel: ViewModel() {
     fun share(id: Long) = repository.share(id)
     fun removeById(id: Long) = repository.removeById(id)
 
-    fun changeContent(content: String){
+    fun changeContent(content: String) {
         val text = content.trim()
-        edited.value?.let{
-            if(text == it.content){
+        edited.value?.let {
+            if (text == it.content) {
                 return@let
             }
             edited.value = it.copy(content = text)
@@ -36,28 +36,20 @@ class PostViewModel: ViewModel() {
 
     }
 
-    fun save(){
-        edited.value?.let{
+    fun save() {
+        edited.value?.let {
             repository.save(it)
         }
         edited.value = empty
     }
-//    fun save(content: String) {
-//        edited.value?.let {
-//            val text = content.trim()
-//            if (it.content != text) {
-//                repository.save(it.copy(content = text))
-//            }
-//        }
-//        edited.value = empty
-//    }
 
     fun edit(post: Post) {
         edited.value = post
     }
-//    fun cancelEditing(post: Post){
-//
-//    }
+
+    fun setEmtyPostToEdited() {
+        edited.value =empty
+    }
 
 
 }
