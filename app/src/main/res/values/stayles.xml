@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<!--    <style name="Style.LikeCheckBox" parent="Widget.Material3.CompoundButton.CheckBox">-->
+<!--        <item name="buttonTint">@color/color_like</item>-->
+<!--    </style>-->
+    <style name="StyleLikeButton" parent="Widget.Material3.Button.TextButton.Icon">
+        <item name="iconTint">@color/color_like</item>
+    </style>
+
+</resources>

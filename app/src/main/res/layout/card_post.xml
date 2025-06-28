@@ -44,17 +44,17 @@
         app:layout_constraintVertical_bias="1.0"
         tools:text="@sample/posts.json/data/published" />
 
-    <ImageView
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/more"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        style="@style/Widget.Material3.ExtendedFloatingActionButton.Icon.Secondary"
+        android:layout_width="48dp"
+        android:layout_height="wrap_content"
         android:background="@android:color/transparent"
         android:contentDescription="@string/description_post_menu"
-        android:src="@drawable/baseline_more_vert_24"
-        app:layout_constraintBottom_toBottomOf="@id/author"
+        app:icon="@drawable/baseline_more_vert_24"
+        app:layout_constraintBottom_toBottomOf="@id/published"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/author" />
-
 
 
     <androidx.constraintlayout.widget.Barrier
@@ -83,44 +83,34 @@
         app:barrierDirection="bottom"
         app:constraint_referenced_ids="content" />
 
-    <ImageButton
-        android:id="@+id/favorite_border"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:background="@android:color/transparent"
-        android:contentDescription="@string/favorite"
-        android:src="@drawable/baseline_favorite_border_24"
-        app:layout_constraintTop_toTopOf="@id/bottom_barrier" />
-
-    <TextView
-        android:id="@+id/like_count"
-        android:layout_width="0dp"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/like"
+        style="@style/StyleLikeButton"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="@+id/favorite_border"
-        app:layout_constraintStart_toEndOf="@+id/favorite_border"
-        app:layout_constraintTop_toTopOf="@+id/favorite_border"
-        tools:text="@sample/posts.json/data/likeCount" />
+        android:background="@android:color/transparent"
+        android:checkable="true"
+        android:contentDescription="@string/favorite"
+        app:icon="@drawable/ic_like"
+        app:layout_constraintTop_toTopOf="@id/bottom_barrier"
+        tools:checked="true"
+        tools:text="1" />
 
-    <ImageView
+
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/share"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        style="@style/Widget.Material3.FloatingActionButton.Secondary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:background="@android:color/transparent"
         android:contentDescription="@string/favorite"
-        android:src="@drawable/baseline_share_24"
-        app:layout_constraintBottom_toBottomOf="@+id/like_count"
-        app:layout_constraintStart_toEndOf="@+id/like_count"
-        app:layout_constraintTop_toTopOf="@+id/like_count" />
-
-    <TextView
-        android:id="@+id/share_count"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="@+id/share"
-        app:layout_constraintStart_toEndOf="@+id/share"
-        app:layout_constraintTop_toTopOf="@+id/share"
-        tools:text="@sample/posts.json/data/shareCount" />
+        app:icon="@drawable/baseline_share_24"
+        app:layout_constraintBottom_toBottomOf="@+id/like"
+        app:layout_constraintStart_toEndOf="@+id/like"
+        app:layout_constraintTop_toTopOf="@+id/like"
+        tools:text="5"/>
 
 
     <TextView
@@ -139,9 +129,9 @@
         android:background="@android:color/transparent"
         android:contentDescription="@string/favorite"
         android:src="@drawable/baseline_remove_red_eye_24"
-        app:layout_constraintBottom_toBottomOf="@+id/share_count"
+        app:layout_constraintBottom_toBottomOf="@+id/share"
         app:layout_constraintEnd_toStartOf="@+id/view_count"
-        app:layout_constraintTop_toTopOf="@+id/share_count" />
+        app:layout_constraintTop_toTopOf="@+id/share" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
