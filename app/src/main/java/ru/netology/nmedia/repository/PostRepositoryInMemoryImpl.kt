@@ -17,6 +17,7 @@ class PostRepositoryInMemoryImpl : PostRepository {
             likeByMe = false,
             shareCount = 60,
             viewCount = 5,
+            videoUrl = "https://rutube.ru/video/6550a91e7e523f9503bed47e4c46d0cb",
         ),
         Post(
             id = nextId++,
@@ -27,6 +28,7 @@ class PostRepositoryInMemoryImpl : PostRepository {
             likeByMe = false,
             shareCount = 62,
             viewCount = 2,
+
         ),
         Post(
             id = nextId++,
@@ -37,6 +39,7 @@ class PostRepositoryInMemoryImpl : PostRepository {
             likeByMe = false,
             shareCount = 63,
             viewCount = 31,
+            videoUrl = "https://rutube.ru/video/371af050a70ac300f98d4ebc151edfc5/?r=plwd",
         ),
         Post(
             id = nextId++,
@@ -47,6 +50,7 @@ class PostRepositoryInMemoryImpl : PostRepository {
             likeByMe = false,
             shareCount = 4,
             viewCount = 4,
+
         ),
 
         )
