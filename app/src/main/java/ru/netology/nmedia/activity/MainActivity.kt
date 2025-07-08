@@ -18,6 +18,7 @@ import ru.netology.nmedia.util.AndroidUtils
 import ru.netology.nmedia.util.focusAndShowKeyboard
 import android.content.Intent
 import androidx.activity.result.launch
+import androidx.core.net.toUri
 
 
 class MainActivity : AppCompatActivity() {
@@ -61,8 +62,9 @@ class MainActivity : AppCompatActivity() {
                     putExtra(Intent.EXTRA_TEXT, post.content)
                     type = "text/plain"
                 }
-//                startActivity(intent)
-                startActivity(intent)
+
+                val shareIntent = Intent.createChooser(intent, getString(R.string.chooser_share_post))
+                startActivity(shareIntent)
 
             }
 
@@ -75,6 +77,15 @@ class MainActivity : AppCompatActivity() {
                 newPostLauncher.launch(post.content)
 
             }
+
+            override fun onVideoPlay(post: Post) {
+                val intent = Intent(Intent.ACTION_VIEW, post.videoUrl?.toUri() );
+                if (intent.resolveActivity(packageManager) != null) {
+                    val playWebVideoIntent = Intent.createChooser(intent, getString(R.string.play_web_video))
+                    startActivity(playWebVideoIntent)
+                }
+            }
+
 
         }
         )
@@ -89,12 +100,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-
-
-
-
-
-
 
 
 //        viewModel.edited.observe(this) { post ->
