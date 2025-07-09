@@ -1,23 +1,21 @@
 package ru.netology.nmedia.activity
 
 import android.os.Bundle
-import android.view.View
-import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
+
+//import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+//import androidx.core.view.ViewCompat
+//import androidx.core.view.WindowInsetsCompat
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.OnInteractorListener
 import ru.netology.nmedia.viewmodel.PostViewModel
 import ru.netology.nmedia.adapter.PostAdapter
 import ru.netology.nmedia.databinding.ActivityMainBinding
 import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.util.AndroidUtils
-import ru.netology.nmedia.util.focusAndShowKeyboard
+
 import android.content.Intent
-import androidx.activity.result.launch
+
 import androidx.core.net.toUri
 
 
@@ -27,7 +25,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 //        enableEdgeToEdge()
         val binding = ActivityMainBinding.inflate(layoutInflater)
-//        binding.groupForEdit.visibility = View.GONE
+
         setContentView(binding.root)
 //        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
 //            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -37,7 +35,11 @@ class MainActivity : AppCompatActivity() {
 
         val viewModel: PostViewModel by viewModels()
         val newPostLauncher = registerForActivityResult(NewPostResultContract) { result ->
-            result ?: return@registerForActivityResult
+            result ?: run {
+                viewModel.setEmtyPostToEdited()
+                return@registerForActivityResult
+            }
+//            result ?: return@registerForActivityResult
             viewModel.changeContent(result)
             viewModel.save()
         }
@@ -50,13 +52,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onShare(post: Post) {
-//                viewModel.share(post.id)
 
-//                val intent = Intent().apply{
-//                    action = Intent.ACTION_SEND
-//                    putExtra(Intent.EXTRA_TEXT, post.content)
-//                    type = "text/plain"
-//                }
                 val intent = Intent().apply {
                     action = Intent.ACTION_SEND
                     putExtra(Intent.EXTRA_TEXT, post.content)
@@ -79,7 +75,8 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onVideoPlay(post: Post) {
-                val intent = Intent(Intent.ACTION_VIEW, post.videoUrl?.toUri() );
+                val intent = Intent(Intent.ACTION_VIEW, post.videoUrl?.toUri() )
+//                startActivity(intent)
                 if (intent.resolveActivity(packageManager) != null) {
                     val playWebVideoIntent = Intent.createChooser(intent, getString(R.string.play_web_video))
                     startActivity(playWebVideoIntent)
@@ -100,47 +97,5 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-
-
-//        viewModel.edited.observe(this) { post ->
-//            if (post.id != 0L) {
-//                binding.groupForEdit.visibility = View.VISIBLE
-//                binding.editMessageTextContent.text = post.content
-//                with(binding.content) {
-//                    requestFocus()
-////                    focusAndShowKeyboard()
-//                    setText(post.content)
-//                }
-//
-//
-//            }
-//        }
-//
-//        with(binding) {
-//            save.setOnClickListener {
-//                if (content.text.isNullOrBlank()) {
-//                    Toast.makeText(
-//                        this@MainActivity,
-//                        R.string.error_empty_content,
-//                        Toast.LENGTH_LONG
-//                    ).show()
-//                    return@setOnClickListener
-//                }
-//                viewModel.changeContent(content.text.toString())
-//                viewModel.save()
-//                content.setText("")
-//                content.clearFocus()
-//                binding.groupForEdit.visibility = View.GONE
-//                AndroidUtils.hideKeyboard(it)
-//            }
-//            closeEditButton.setOnClickListener {
-//                viewModel.setEmtyPostToEdited()
-//                content.setText("")
-//                content.clearFocus()
-//                binding.groupForEdit.visibility = View.GONE
-//                AndroidUtils.hideKeyboard(it)
-//            }
-//        }
     }
 }
-
