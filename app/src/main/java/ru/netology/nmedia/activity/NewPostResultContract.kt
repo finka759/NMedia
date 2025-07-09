@@ -1,8 +1,3 @@
-//package ru.netology.nmedia.activity
-//
-//class NewPostResultContract {
-//}
-
 package ru.netology.nmedia.activity
 
 import android.app.Activity

@@ -4,7 +4,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
-import androidx.activity.result.launch
 
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -14,9 +13,6 @@ import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
 
-//typealias OnLikeListener = (post: Post) -> Unit
-//typealias OnShareListener = (post: Post) -> Unit
-//typealias OnRemoveListener = (post: Post) -> Unit
 
 interface OnInteractorListener {
     fun onLike(post: Post)
@@ -28,9 +24,6 @@ interface OnInteractorListener {
 }
 
 class PostAdapter(
-//    private val onLikeListener: OnLikeListener,
-//    private val onShareListener: OnShareListener,
-//    private val onRemoveListener: OnRemoveListener
     private val onInteractorListener: OnInteractorListener
 ) : ListAdapter<Post, PostViewHolder>(PostDiffCallBack) {
 
@@ -48,20 +41,14 @@ class PostAdapter(
 
 class PostViewHolder(
     private val binding: CardPostBinding,
-//    private val onLikeListener: OnLikeListener,
-//    private val onShareListener: OnShareListener,
-//    private val onRemoveListener: OnRemoveListener
     private val onInteractorListener: OnInteractorListener
 ) : RecyclerView.ViewHolder(binding.root) {
     fun bind(post: Post) = with(binding) {
         author.text = post.author
         content.text = post.content
         published.text = post.published
-//        likeCount.text = getStrViewFromInt(post.likeCount)
         share.text = getStrViewFromInt(post.shareCount)
-//        shareCount.text = getStrViewFromInt(post.shareCount)
         viewCount.text = post.viewCount.toString()
-//        like.isChecked = post.likeByMe
         like.apply{
             isChecked = post.likeByMe
             text = post.likeCount.toString()
@@ -69,22 +56,14 @@ class PostViewHolder(
         if(post.videoUrl != null){
             videoUrl.visibility = View.VISIBLE
         }
-//        videoUrl.text = post.videoUrl
 
-//        favoriteBorder.setImageResource(
-//            if (post.likeByMe) {
-//                R.drawable.baseline_favorite_24
-//            } else {
-//                R.drawable.baseline_favorite_border_24
-//            }
-//        )
         like.setOnClickListener {
             onInteractorListener.onLike(post)
-//            onLikeListener(post)
+
         }
         share.setOnClickListener {
             onInteractorListener.onShare(post)
-//            onShareListener(post)
+
         }
         more.setOnClickListener {
             PopupMenu(it.context, it).apply {
@@ -93,7 +72,6 @@ class PostViewHolder(
                     when (item.itemId) {
                         R.id.remove -> {
                             onInteractorListener.onRemove(post)
-//                            onRemoveListener(post)
                             true
                         }
                         R.id.edit -> {
