@@ -59,7 +59,8 @@ class MainActivity : AppCompatActivity() {
                     type = "text/plain"
                 }
 
-                val shareIntent = Intent.createChooser(intent, getString(R.string.chooser_share_post))
+                val shareIntent =
+                    Intent.createChooser(intent, getString(R.string.chooser_share_post))
                 startActivity(shareIntent)
 
             }
@@ -75,10 +76,11 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onVideoPlay(post: Post) {
-                val intent = Intent(Intent.ACTION_VIEW, post.videoUrl?.toUri() )
+                val intent = Intent(Intent.ACTION_VIEW, post.videoUrl?.toUri())
 //                startActivity(intent)
                 if (intent.resolveActivity(packageManager) != null) {
-                    val playWebVideoIntent = Intent.createChooser(intent, getString(R.string.play_web_video))
+                    val playWebVideoIntent =
+                        Intent.createChooser(intent, getString(R.string.play_web_video))
                     startActivity(playWebVideoIntent)
                 }
             }

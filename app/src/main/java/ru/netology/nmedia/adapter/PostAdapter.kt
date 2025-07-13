@@ -55,6 +55,8 @@ class PostViewHolder(
         }
         if(post.videoUrl != null){
             videoUrl.visibility = View.VISIBLE
+        }else {
+            videoUrl.visibility = View.GONE
         }
 
         like.setOnClickListener {
