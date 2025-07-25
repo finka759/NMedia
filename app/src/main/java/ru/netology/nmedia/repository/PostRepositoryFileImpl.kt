@@ -1,7 +1,6 @@
 package ru.netology.nmedia.repository
 
 import android.content.Context
-import androidx.core.content.edit
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.gson.Gson
@@ -10,24 +9,14 @@ import ru.netology.nmedia.dto.Post
 
 class PostRepositoryFileImpl(private val context: Context) : PostRepository {
 
-    //    private val prefs = context.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE)
     private var nextId = 1L
     private var posts = emptyList<Post>()
         set(value) {
             field = value
-            data.value = posts
             sync()
         }
 
     private val data = MutableLiveData(posts)
-
-//    init {
-//        prefs.getString(KEY_POSTS, null)?.let { value ->
-//            posts = gson.fromJson(value, type)
-//            nextId = (posts.maxOfOrNull { it.id } ?: 0) + 1
-////            data.value = posts
-//        }
-//    }
 
     init {
         val file = context.filesDir.resolve(FILE_NAME)
@@ -35,7 +24,7 @@ class PostRepositoryFileImpl(private val context: Context) : PostRepository {
             context.openFileInput(FILE_NAME).bufferedReader().use {
                 posts = gson.fromJson(it, type)
                 nextId = (posts.maxOfOrNull { it.id } ?: 0) + 1
-//                data.value = posts
+                data.value = posts
             }
         } else {
             sync()
@@ -55,7 +44,7 @@ class PostRepositoryFileImpl(private val context: Context) : PostRepository {
                 post
             }
         }
-//        data.value = posts
+        data.value = posts
     }
 
     override fun share(id: Long) {
@@ -68,12 +57,12 @@ class PostRepositoryFileImpl(private val context: Context) : PostRepository {
                 post
             }
         }
-//        data.value = posts
+        data.value = posts
     }
 
     override fun removeById(id: Long) {
         posts = posts.filter { it.id != id }
-//        data.value = posts
+        data.value = posts
     }
 
     override fun save(post: Post) {
@@ -93,13 +82,10 @@ class PostRepositoryFileImpl(private val context: Context) : PostRepository {
                 } else it
             }
         }
-//        data.value = posts
+        data.value = posts
     }
 
     private fun sync() {
-//        prefs.edit {
-//            putString(KEY_POSTS, gson.toJson(posts))
-//        }
         context.openFileOutput(FILE_NAME, Context.MODE_PRIVATE).bufferedWriter().use {
             it.write(gson.toJson(posts))
         }
@@ -110,6 +96,5 @@ class PostRepositoryFileImpl(private val context: Context) : PostRepository {
         private val gson = Gson()
         private val type = TypeToken.getParameterized(List::class.java, Post::class.java).type
     }
-
 
 }
