@@ -20,6 +20,7 @@ interface OnInteractorListener {
     fun onRemove(post: Post)
     fun onEdit(post: Post)
     fun onVideoPlay(post: Post)
+    fun toSinglePost(post:Post)
 
 }
 
@@ -58,6 +59,7 @@ class PostViewHolder(
         }else {
             videoUrl.visibility = View.GONE
         }
+//        videoUrl.visibility = View.VISIBLE
 
         like.setOnClickListener {
             onInteractorListener.onLike(post)
@@ -87,6 +89,21 @@ class PostViewHolder(
         }
         videoUrl.setOnClickListener{
             onInteractorListener.onVideoPlay(post)
+        }
+        content.setOnClickListener{
+            onInteractorListener.toSinglePost(post)
+        }
+        avatar.setOnClickListener{
+            onInteractorListener.toSinglePost(post)
+        }
+        author.setOnClickListener{
+            onInteractorListener.toSinglePost(post)
+        }
+        published.setOnClickListener{
+            onInteractorListener.toSinglePost(post)
+        }
+        barrier.setOnClickListener{
+            onInteractorListener.toSinglePost(post)
         }
 
     }
