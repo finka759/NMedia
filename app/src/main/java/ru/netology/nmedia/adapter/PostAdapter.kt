@@ -20,7 +20,7 @@ interface OnInteractorListener {
     fun onRemove(post: Post)
     fun onEdit(post: Post)
     fun onVideoPlay(post: Post)
-    fun toSinglePost(post:Post)
+    fun toSinglePost(post: Post)
 
 }
 
@@ -50,13 +50,13 @@ class PostViewHolder(
         published.text = post.published
         share.text = getStrViewFromInt(post.shareCount)
         viewCount.text = post.viewCount.toString()
-        like.apply{
+        like.apply {
             isChecked = post.likeByMe
             text = post.likeCount.toString()
         }
-        if(post.videoUrl != null){
+        if (post.videoUrl != null) {
             videoUrl.visibility = View.VISIBLE
-        }else {
+        } else {
             videoUrl.visibility = View.GONE
         }
 //        videoUrl.visibility = View.VISIBLE
@@ -78,34 +78,35 @@ class PostViewHolder(
                             onInteractorListener.onRemove(post)
                             true
                         }
+
                         R.id.edit -> {
                             onInteractorListener.onEdit(post)
                             true
                         }
+
                         else -> false
                     }
                 }
             }.show()
         }
-        videoUrl.setOnClickListener{
+        videoUrl.setOnClickListener {
             onInteractorListener.onVideoPlay(post)
         }
-        content.setOnClickListener{
+        content.setOnClickListener {
             onInteractorListener.toSinglePost(post)
         }
-        avatar.setOnClickListener{
+        avatar.setOnClickListener {
             onInteractorListener.toSinglePost(post)
         }
-        author.setOnClickListener{
+        author.setOnClickListener {
             onInteractorListener.toSinglePost(post)
         }
-        published.setOnClickListener{
+        published.setOnClickListener {
             onInteractorListener.toSinglePost(post)
         }
-        barrier.setOnClickListener{
+        barrier.setOnClickListener {
             onInteractorListener.toSinglePost(post)
         }
-
     }
 }
 

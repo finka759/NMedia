@@ -7,7 +7,7 @@ import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.ActivityAppBinding
 import androidx.navigation.findNavController
-import ru.netology.nmedia.activity.FeedFragment.Companion.textArgs
+import ru.netology.nmedia.fragments.FeedFragment.Companion.textArgs
 
 
 class AppActivity : AppCompatActivity() {
