@@ -1,4 +1,4 @@
-package ru.netology.nmedia.activity
+package ru.netology.nmedia.fragments
 
 import android.os.Bundle
 
@@ -81,13 +81,13 @@ class FeedFragment : Fragment() {
             }
 
             override fun onEdit(post: Post) {
-//                viewModel.edit(post)
                 findNavController().navigate(
                     R.id.action_feedFragment_to_newPostFragment,
                     Bundle().apply {
                         textArgs = post.content
                     }
                 )
+                viewModel.edit(post)
             }
 
             override fun toSinglePost(post: Post) {
@@ -121,9 +121,5 @@ class FeedFragment : Fragment() {
         }
         return binding.root
     }
-
-
-
-
 
 }
