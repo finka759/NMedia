@@ -17,6 +17,7 @@ class PostRepositorySQLiteImpl(
     }
 
     override fun share(id: Long) {
+        dao.shareById(id)
         posts = posts.map { post ->
             if (post.id == id) {
                 post.copy(
