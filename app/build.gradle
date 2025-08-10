@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id 'org.jetbrains.kotlin.kapt'
 }
 
 android {
@@ -37,6 +38,7 @@ dependencies {
 //    def arch_version = "2.1.0"
 //    def lifecycle_version = "2.3.0"
 //    def activity_version = "2.1.0"
+    def room_ver = "2.6.1"
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
     implementation libs.material
@@ -57,4 +59,11 @@ dependencies {
 //    testImplementation "androidx.arch.core:core-testing:$arch_version"
 //    implementation "androidx.activity:activity-ktx:$activity_version"
     implementation libs.gson
+
+    implementation libs.androidx.room.runtime
+    kapt "androidx.room:room-compiler:$room_ver"
+
+//    implementation "androidx.room:room-runtime:$room_ver"
+//    kapt "androidx.room:room-compiler:$room_ver"
+
 }
