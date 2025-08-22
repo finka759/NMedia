@@ -18,6 +18,12 @@
     <string name="second_fragment_label" translatable="false">Second Fragment</string>
     <string name="next" translatable="false">Next</string>
     <string name="previous" translatable="false">Previous</string>
+    <string name="channel_remote_name">Server notifications</string>
+    <string name="channel_remote_description">Notifications from remote server</string>
+
+    <string name="google_play_unavailable">Google Api Unavailable</string>
+    <string name="notification_user_liked" >User %1$s liked %2$s\'s post</string>
+    <string name="notification_new_post">%1$s published new post</string>
 
     <string name="lorem_ipsum" translatable="false">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
