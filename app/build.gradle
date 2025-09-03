@@ -24,6 +24,10 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            manifestPlaceholders.usesCleartextTraffic = false
+        }
+        debug {
+            manifestPlaceholders.usesCleartextTraffic = true
         }
     }
     compileOptions {
@@ -43,6 +47,7 @@ dependencies {
 //    def lifecycle_version = "2.3.0"
 //    def activity_version = "2.1.0"
     def room_ver = "2.6.1"
+    def okhttp_version = "5.1.0"
 
 
     implementation libs.androidx.core.ktx
@@ -89,5 +94,7 @@ dependencies {
 //    implementation "com.google.android.gms:play-services-base:$play_services_base_version"
     implementation libs.play.services.base
 //    implementation(libs.play.services)
+
+    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
 
 }

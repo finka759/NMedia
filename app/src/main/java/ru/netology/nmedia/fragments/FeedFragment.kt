@@ -101,24 +101,26 @@ class FeedFragment : Fragment() {
 
             override fun onVideoPlay(post: Post) {
                 val intent = Intent(Intent.ACTION_VIEW, post.videoUrl?.toUri())
-                    val playWebVideoIntent =
-                        Intent.createChooser(intent, getString(R.string.play_web_video))
-                    startActivity(playWebVideoIntent)
+                val playWebVideoIntent =
+                    Intent.createChooser(intent, getString(R.string.play_web_video))
+                startActivity(playWebVideoIntent)
             }
 
         }
         )
 
         binding.list.adapter = adapter
+        adapter.submitList(viewModel.data)
+//        viewModel.data.observe(viewLifecycleOwner) { posts ->
+//            val isNew = posts.size != adapter.itemCount
+//            adapter.submitList(posts) {
+//                if (isNew) {
+//                    binding.list.smoothScrollToPosition(0)
+//                }
+//            }
+//        }
 
-        viewModel.data.observe(viewLifecycleOwner) { posts ->
-            val isNew = posts.size != adapter.itemCount
-            adapter.submitList(posts) {
-                if (isNew) {
-                    binding.list.smoothScrollToPosition(0)
-                }
-            }
-        }
+
         return binding.root
     }
 

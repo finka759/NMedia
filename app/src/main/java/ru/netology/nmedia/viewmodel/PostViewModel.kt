@@ -7,7 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.repository.PostRepository
-import ru.netology.nmedia.repository.PostRepositoryImpl
+import ru.netology.nmedia.repository.PostRepositoryNetworkImpl
 
 
 private val empty = Post(
@@ -21,12 +21,12 @@ private val empty = Post(
 
 class PostViewModel (application: Application): AndroidViewModel(application) {
 
-    private val repository: PostRepository = PostRepositoryImpl(
-        AppDb.getInstance(application).postDao()
+    private val repository: PostRepository = PostRepositoryNetworkImpl(
+//        AppDb.getInstance(application).postDao()
     )
     var gDraftContent: String = ""
 
-    val data: LiveData<List<Post>> = repository.get()
+    val data: List<Post> = repository.get()
     private val edited = MutableLiveData(empty)
     fun like(id: Long) = repository.like(id)
     fun share(id: Long) = repository.share(id)
