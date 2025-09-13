@@ -39,7 +39,7 @@ class SinglePostFragment  : Fragment() {
         val postId = arguments?.textArgs ?: -1
 
         viewModel.data.observe(viewLifecycleOwner) { posts ->
-            val post = posts.find { it.id.toString() == postId.toString()} ?: return@observe
+            val post = posts.posts.find { it.id.toString() == postId.toString()} ?: return@observe
             with(binding.post) {
                 author.text = post.author
                 content.text = post.content

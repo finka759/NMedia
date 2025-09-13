@@ -5,6 +5,7 @@ import com.google.gson.reflect.TypeToken
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import ru.netology.nmedia.dto.Post
 import java.util.concurrent.TimeUnit
 
@@ -47,10 +48,24 @@ class PostRepositoryNetworkImpl: PostRepository {
     }
 
     override fun removeById(id: Long) {
-        TODO()
+        val request: Request = Request.Builder()
+            .delete()
+            .url("${BASE_URL}/api/slow/posts/$id")
+            .build()
+
+        client.newCall(request)
+            .execute()
+            .close()
     }
 
     override fun save(post: Post) {
-        TODO()
+        val request: Request = Request.Builder()
+            .post(gson.toJson(post).toRequestBody(jsonType))
+            .url("${BASE_URL}/api/slow/posts")
+            .build()
+
+        client.newCall(request)
+            .execute()
+            .close()
     }
 }
