@@ -20,8 +20,10 @@ import com.google.firebase.messaging.FirebaseMessaging
 class AppActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         val binding = ActivityAppBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        
         requestNotificationsPermission()
 
         intent?.let {
