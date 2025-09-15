@@ -56,8 +56,8 @@ class PostViewHolder(
         share.text = getStrViewFromInt(post.shareCount)
         viewCount.text = post.viewCount.toString()
         like.apply {
-            isChecked = post.likeByMe
-            text = post.likeCount.toString()
+            isChecked = post.likedByMe
+            text = post.likes.toString()
         }
         if (post.videoUrl != null) {
             videoUrl.visibility = View.VISIBLE

@@ -18,16 +18,16 @@ private val empty = Post(
     author = "",
     content = "",
     published = "",
-    likeCount = 0,
-    likeByMe = false
+    likes = 0,
+    likedByMe = false
 )
 
 class PostViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository: PostRepository = PostRepositoryNetworkImpl(  )
+    private val repository: PostRepository = PostRepositoryNetworkImpl()
     var gDraftContent: String = ""
 
-    private var _data = MutableLiveData(FeedModel())
+    private val _data = MutableLiveData(FeedModel())
     val data: LiveData<FeedModel>
         get() = _data
     val edited = MutableLiveData(empty)
@@ -54,7 +54,15 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun like(id: Long) = repository.like(id)
+    fun like(id: Long, likedByMe: Boolean) {
+        thread {
+            val post = repository.like(id, likedByMe)
+            loadPosts()
+        }
+
+
+    }
+
     fun share(id: Long) = repository.share(id)
 
     fun removeById(id: Long) {
@@ -62,14 +70,15 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             // Оптимистичная модель
             val old = _data.value?.posts.orEmpty()
             _data.postValue(
-                _data.value?.posts?.copy(posts = _data.value?.posts.orEmpty()
-                    .filter { it.id != id }
+                _data.value?.copy(
+                    posts = _data.value?.posts.orEmpty()
+                        .filter { it.id != id }
                 )
             )
             try {
                 repository.removeById(id)
             } catch (e: IOException) {
-                _data.postValue(_data.value?.posts?.copy(posts = old))
+                _data.postValue(_data.value?.copy(posts = old))
             }
         }
     }

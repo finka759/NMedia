@@ -15,6 +15,7 @@ import getStrViewFromInt
 import ru.netology.nmedia.R
 import ru.netology.nmedia.fragments.FeedFragment.Companion.textArgs
 import ru.netology.nmedia.databinding.FragmentSinglePostBinding
+import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.viewmodel.PostViewModel
 
 
@@ -47,8 +48,8 @@ class SinglePostFragment  : Fragment() {
                 share.text = getStrViewFromInt(post.shareCount)
                 viewCount.text = post.viewCount.toString()
                 like.apply{
-                    isChecked = post.likeByMe
-                    text = post.likeCount.toString()
+                    isChecked = post.likedByMe
+                    text = post.likes.toString()
                 }
                 if(post.videoUrl != null){
                     videoUrl.visibility = View.VISIBLE
@@ -57,7 +58,7 @@ class SinglePostFragment  : Fragment() {
                 }
 
                 like.setOnClickListener {
-                    viewModel.like(post.id)
+                    viewModel.like(post.id, post.likedByMe)
                 }
 
                 share.setOnClickListener {
