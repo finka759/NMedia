@@ -8,10 +8,13 @@ import android.widget.PopupMenu
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import getStrViewFromInt
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.repository.PostRepositoryNetworkImpl
 
 
 interface OnInteractorListener {
@@ -43,8 +46,6 @@ class PostAdapter(
 }
 
 
-
-
 class PostViewHolder(
     private val binding: CardPostBinding,
     private val onInteractorListener: OnInteractorListener
@@ -55,6 +56,7 @@ class PostViewHolder(
         published.text = post.published
         share.text = getStrViewFromInt(post.shareCount)
         viewCount.text = post.viewCount.toString()
+
         like.apply {
             isChecked = post.likedByMe
             text = post.likes.toString()
@@ -112,6 +114,18 @@ class PostViewHolder(
         barrier.setOnClickListener {
             onInteractorListener.toSinglePost(post)
         }
+
+
+
+        val url = "${PostRepositoryNetworkImpl.BASE_URL}/avatars/${post.authorAvatar}"
+        Glide.with(avatar)
+            .load(url)
+            .placeholder(R.drawable.ic_loading_100dp)
+            .error(R.drawable.ic_error_100dp)
+            .timeout(10_000)
+            .transform(RoundedCorners(50))
+            .into(avatar)
+
     }
 }
 

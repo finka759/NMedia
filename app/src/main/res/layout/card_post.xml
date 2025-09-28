@@ -10,14 +10,14 @@
 
     <ImageView
         android:id="@+id/avatar"
-        android:layout_width="@dimen/posts_avatar_size"
-        android:layout_height="@dimen/posts_avatar_size"
-        android:layout_marginBottom="@dimen/common_spacing"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:contentDescription="@string/description_post_author_avatar"
-        android:src="@drawable/netology_48"
+        android:src="@drawable/ic_close_edit_48dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:srcCompat="@sample/posts.json/data/authorAvatar" />
+
 
     <TextView
         android:id="@+id/author"

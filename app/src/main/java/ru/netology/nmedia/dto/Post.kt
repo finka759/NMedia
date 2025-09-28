@@ -10,4 +10,5 @@ data class Post (
     val shareCount: Int = 0,
     val viewCount: Int = 0,
     val videoUrl: String? = null,
+    var authorAvatar: String? = null,
 )
