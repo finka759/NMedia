@@ -50,6 +50,7 @@ dependencies {
     def okhttp_version = "5.1.0"
 
 
+
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
     implementation libs.material
@@ -96,5 +97,6 @@ dependencies {
 //    implementation(libs.play.services)
 
     implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
+    implementation libs.glide
 
 }

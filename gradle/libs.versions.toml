@@ -1,6 +1,7 @@
 [versions]
 agp = "8.10.1"
 coreTesting = "2.1.0"
+glide = "4.16.0"
 gson = "2.12.1"
 kotlin = "2.2.10"
 coreKtx = "1.16.0"
@@ -27,6 +28,7 @@ androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "
 androidx-xrecyclerview = { module = "androidx.recyclerview: recyclerview", version.ref = "xrecyclerview" }
 com-google-firebase-firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }
 
+glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

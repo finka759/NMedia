@@ -40,24 +40,33 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun loadPosts() {
-        thread {
-            // Начинаем загрузку
-            _data.postValue(FeedModel(loading = true))
-            try {
-                // Данные успешно получены
-                val posts = repository.get()
-                FeedModel(posts = posts, empty = posts.isEmpty())
-            } catch (e: IOException) {
-                // Получена ошибка
-                FeedModel(error = true)
-            }.also(_data::postValue)
-        }
+
+        // Начинаем загрузку
+        _data.postValue(FeedModel(loading = true))
+        repository.getAllAsync(object : PostRepository.GetAllCallback {
+            override fun onSuccess(posts: List<Post>) {
+                _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
+            }
+
+            override fun onError(e: Exception) {
+                _data.postValue(FeedModel(error = true))
+            }
+
+        })
     }
 
     fun like(id: Long, likedByMe: Boolean) {
         thread {
             val post = repository.like(id, likedByMe)
-            loadPosts()
+//            loadPosts()
+
+            _data.postValue(
+                _data.value?.copy(
+                    posts = _data.value?.posts.orEmpty()
+                        .map { if (it.id == id) post else it } // <----
+                )
+            )
+
         }
 
 
@@ -94,18 +103,39 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     }
 
+//    fun save() {
+//
+//        edited.value?.let {
+//            thread {
+//                repository.save(it)
+//                loadPosts()
+//                _postCreated.postValue(Unit)
+//            }
+//        }
+//        edited.value = empty
+//
+//    }
+
     fun save() {
 
         edited.value?.let {
-            thread {
-                repository.save(it)
-                loadPosts()
-                _postCreated.postValue(Unit)
-            }
+
+            repository.saveAsync(it, object : PostRepository.SaveCallback {
+                override fun onSuccess(post: Post) {
+                    loadPosts()
+                    _postCreated.postValue(Unit)
+                }
+
+                override fun onError(e: Exception) {
+                    _data.postValue(FeedModel(error = true))
+                }
+            })
+
+
         }
         edited.value = empty
-
     }
+
 
     fun edit(post: Post) {
         edited.value = post
