@@ -12,9 +12,11 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import getStrViewFromInt
 import ru.netology.nmedia.R
+import ru.netology.nmedia.api.BASE_URL
+import ru.netology.nmedia.api.PostsApiService
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.repository.PostRepositoryNetworkImpl
+
 
 
 interface OnInteractorListener {
@@ -117,13 +119,15 @@ class PostViewHolder(
 
 
 
-        val url = "${PostRepositoryNetworkImpl.BASE_URL}/avatars/${post.authorAvatar}"
+//        val url = "${BASE_URL}/avatars/${post.authorAvatar}"
+        val url = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
         Glide.with(avatar)
             .load(url)
             .placeholder(R.drawable.ic_loading_100dp)
             .error(R.drawable.ic_error_100dp)
             .timeout(10_000)
-            .transform(RoundedCorners(50))
+            .circleCrop()
+//            .transform(RoundedCorners(50))
             .into(avatar)
 
     }

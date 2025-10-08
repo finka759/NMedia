@@ -9,7 +9,7 @@ interface PostRepository {
     fun removeById(id: Long)
 //    fun save(post: Post)
 
-    fun saveAsync(post: Post, callback: SaveCallback)
+    fun save(post: Post, callback: SaveCallback)
 
     interface SaveCallback{
         fun onSuccess(post: Post)
@@ -20,6 +20,6 @@ interface PostRepository {
 
     interface GetAllCallback{
         fun onSuccess(posts: List<Post>)
-        fun onError(e: Exception)
+        fun onError(e: Throwable)
     }
 }
