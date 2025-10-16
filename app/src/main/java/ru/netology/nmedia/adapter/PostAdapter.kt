@@ -11,8 +11,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import getStrViewFromInt
+import ru.netology.nmedia.BuildConfig
 import ru.netology.nmedia.R
-import ru.netology.nmedia.api.BASE_URL
+//import ru.netology.nmedia.api.BASE_URL
 import ru.netology.nmedia.api.PostsApiService
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
@@ -119,8 +120,8 @@ class PostViewHolder(
 
 
 
-//        val url = "${BASE_URL}/avatars/${post.authorAvatar}"
-        val url = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
+        val url = "${BuildConfig.BASE_URL}/avatars/${post.authorAvatar}"
+//        val url = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
         Glide.with(avatar)
             .load(url)
             .placeholder(R.drawable.ic_loading_100dp)

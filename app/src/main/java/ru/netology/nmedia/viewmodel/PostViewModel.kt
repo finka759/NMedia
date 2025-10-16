@@ -58,14 +58,14 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     fun like(id: Long, likedByMe: Boolean) {
         thread {
             val post = repository.like(id, likedByMe)
-//            loadPosts()
+            loadPosts()
 
-            _data.postValue(
-                _data.value?.copy(
-                    posts = _data.value?.posts.orEmpty()
-                        .map { if (it.id == id) post else it } // <----
-                )
-            )
+//            _data.postValue(
+//                _data.value?.copy(
+//                    posts = _data.value?.posts.orEmpty()
+//                        .map { if (it.id == id) post else it } // <----
+//                )
+//            )
 
         }
 
@@ -91,6 +91,11 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
+//    fun removeById(id: Long) {
+//
+//    }
+
 
     fun changeContent(content: String) {
         val text = content.trim()

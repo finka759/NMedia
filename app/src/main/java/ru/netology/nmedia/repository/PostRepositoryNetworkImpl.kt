@@ -1,17 +1,21 @@
 package ru.netology.nmedia.repository
 import com.google.gson.reflect.TypeToken
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import ru.netology.nmedia.api.PostsApi
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import ru.netology.nmedia.BuildConfig.BASE_URL
 import ru.netology.nmedia.dto.Post
+import java.util.concurrent.TimeUnit
 
 class PostRepositoryNetworkImpl : PostRepository {
 
-//    private val client = OkHttpClient.Builder()
-//        .connectTimeout(30, TimeUnit.SECONDS)
-//        .build()
+    private val client = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .build()
 
     //    private val gson = Gson()
 //    private val typeToken = object : TypeToken<List<Post>>() {}
@@ -68,35 +72,17 @@ class PostRepositoryNetworkImpl : PostRepository {
                 }
 
             })
-
-//        Glide.with(binding.image)
-//            .load("${BASE_URL}/avatars/sber.jpg")
-//            .into(binding.image)
-
     }
 
 
-    override fun like(id: Long, likedByMe: Boolean): Post {
-        TODO()
+    override fun like(id: Long, likedByMe: Boolean){
 
-//        val EMPTY_REQUEST = ByteArray(0).toRequestBody();
-//
-//
-//        val request = if (!likedByMe) {
-//            Request.Builder()
-//                .post(EMPTY_REQUEST)
-//                .url("${BASE_URL}/api/posts/$id/likes")
-//                .build()
-//        } else {
-//            Request.Builder()
-//                .delete()
-//                .url("${BASE_URL}/api/posts/$id/likes")
-//                .build()
-//        }
-//
-//
-//
-//
+        val request = if (!likedByMe) {
+            PostsApi.service.dislikeById(id)
+        } else {
+            PostsApi.service.likeById(id)
+        }
+
 //        return client.newCall(request)
 //            .execute()
 //            .let { it.body?.string() ?: throw RuntimeException("body is null") }
@@ -112,8 +98,14 @@ class PostRepositoryNetworkImpl : PostRepository {
     }
 
     override fun removeById(id: Long) {
-        PostsApi.service.removeById(id)
+        val request: Request = Request.Builder()
+            .delete()
+            .url("${BASE_URL}/api/slow/posts/$id")
+            .build()
+
+        client.newCall(request)
             .execute()
+            .close()
     }
 
     override fun save(post: Post, callback: PostRepository.SaveCallback) {
