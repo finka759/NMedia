@@ -6,8 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
-import android.widget.Toast
-import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -15,7 +13,6 @@ import getStrViewFromInt
 import ru.netology.nmedia.R
 import ru.netology.nmedia.fragments.FeedFragment.Companion.textArgs
 import ru.netology.nmedia.databinding.FragmentSinglePostBinding
-import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.viewmodel.PostViewModel
 
 
@@ -58,7 +55,7 @@ class SinglePostFragment  : Fragment() {
                 }
 
                 like.setOnClickListener {
-                    viewModel.like(post.id, post.likedByMe)
+                    viewModel.like(post.id)
                 }
 
                 share.setOnClickListener {

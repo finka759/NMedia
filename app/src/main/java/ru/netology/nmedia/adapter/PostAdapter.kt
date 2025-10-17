@@ -4,17 +4,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
-
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import getStrViewFromInt
+import ru.netology.nmedia.BuildConfig
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.repository.PostRepositoryNetworkImpl
+
 
 
 interface OnInteractorListener {
@@ -66,7 +65,6 @@ class PostViewHolder(
         } else {
             videoUrl.visibility = View.GONE
         }
-//        videoUrl.visibility = View.VISIBLE
 
         like.setOnClickListener {
             onInteractorListener.onLike(post)
@@ -117,13 +115,14 @@ class PostViewHolder(
 
 
 
-        val url = "${PostRepositoryNetworkImpl.BASE_URL}/avatars/${post.authorAvatar}"
+        val url = "${BuildConfig.BASE_URL}/avatars/${post.authorAvatar}"
+//        val url = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
         Glide.with(avatar)
             .load(url)
             .placeholder(R.drawable.ic_loading_100dp)
             .error(R.drawable.ic_error_100dp)
             .timeout(10_000)
-            .transform(RoundedCorners(50))
+            .circleCrop()
             .into(avatar)
 
     }

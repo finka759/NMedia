@@ -39,18 +39,11 @@ class FeedFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-//        enableEdgeToEdge()
         val binding = FragmentFeedBinding.inflate(
             inflater,
             container,
             false,
         )
-
-//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-//            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-//            insets
-//        }
 
         val viewModel: PostViewModel by viewModels(ownerProducer = ::requireParentFragment)
 
@@ -60,7 +53,7 @@ class FeedFragment : Fragment() {
 
         val adapter = PostAdapter(object : OnInteractorListener {
             override fun onLike(post: Post) {
-                viewModel.like(post.id, post.likedByMe)
+                viewModel.like(post.id)
             }
 
             override fun onShare(post: Post) {
@@ -112,8 +105,6 @@ class FeedFragment : Fragment() {
 
         binding.list.adapter = adapter
 
-//        adapter.submitList(viewModel.data)
-
         viewModel.data.observe(viewLifecycleOwner) { state ->
             adapter.submitList(state.posts)
             binding.progress.isVisible = state.loading
@@ -124,16 +115,6 @@ class FeedFragment : Fragment() {
         binding.retryButton.setOnClickListener {
             viewModel.loadPosts()
         }
-
-//        viewModel.data.observe(viewLifecycleOwner) { posts ->
-//            val isNew = posts.size != adapter.itemCount
-//            adapter.submitList(posts) {
-//                if (isNew) {
-//                    binding.list.smoothScrollToPosition(0)
-//                }
-//            }
-//        }
-
 
         return binding.root
     }
