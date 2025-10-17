@@ -4,17 +4,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
-
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import getStrViewFromInt
 import ru.netology.nmedia.BuildConfig
 import ru.netology.nmedia.R
-//import ru.netology.nmedia.api.BASE_URL
-import ru.netology.nmedia.api.PostsApiService
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
 
@@ -69,7 +65,6 @@ class PostViewHolder(
         } else {
             videoUrl.visibility = View.GONE
         }
-//        videoUrl.visibility = View.VISIBLE
 
         like.setOnClickListener {
             onInteractorListener.onLike(post)
@@ -128,7 +123,6 @@ class PostViewHolder(
             .error(R.drawable.ic_error_100dp)
             .timeout(10_000)
             .circleCrop()
-//            .transform(RoundedCorners(50))
             .into(avatar)
 
     }

@@ -19,10 +19,6 @@ private val logging = HttpLoggingInterceptor().apply {
     }
 }
 
-//private val okhttp = OkHttpClient.Builder()
-//    .addInterceptor(logging)
-//    .build()
-
 private val client = OkHttpClient.Builder()
     .connectTimeout(30, TimeUnit.SECONDS)
     .apply {
@@ -40,7 +36,7 @@ private val retrofit = Retrofit.Builder()
     .client(client)
     .build()
 
-interface PostsApiService {
+interface PostApiService {
     @GET("posts")
     fun getAll(): Call<List<Post>>
 
@@ -60,8 +56,8 @@ interface PostsApiService {
     fun dislikeById(@Path("id") id: Long): Call<Post>
 }
 
-object PostsApi {
-    val service: PostsApiService by lazy {
-        retrofit.create(PostsApiService::class.java)
+object PostApi {
+    val service: PostApiService by lazy {
+        retrofit.create(PostApiService::class.java)
     }
 }
