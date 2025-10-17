@@ -55,7 +55,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     }
 
-    fun like(id: Long, likedByMe: Boolean) {
+    fun like(id: Long) {
 
         val currentState = _data.value ?: return
         val posts = currentState.posts
@@ -63,6 +63,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         val likedByMe = post.likedByMe
 
         repository.like(id, likedByMe, object : PostRepository.PostCallback<Post> {
+
             override fun onSuccess(result: Post) {
                 val refreshState = _data.value ?: return
                 val updatedPosts = refreshState.posts.map {
@@ -70,7 +71,6 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 _data.postValue(refreshState.copy(posts = updatedPosts))
             }
-
 
             override fun onError(error: Throwable) {
                 _data.value

@@ -58,7 +58,7 @@ class SinglePostFragment  : Fragment() {
                 }
 
                 like.setOnClickListener {
-                    viewModel.like(post.id, post.likedByMe)
+                    viewModel.like(post.id)
                 }
 
                 share.setOnClickListener {

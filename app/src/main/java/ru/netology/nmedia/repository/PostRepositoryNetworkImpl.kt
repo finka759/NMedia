@@ -36,7 +36,7 @@ class PostRepositoryNetworkImpl : PostRepository {
                 }
 
                 override fun onFailure(
-                    call: retrofit2.Call<List<Post>>,
+                    call: Call<List<Post>>,
                     t: Throwable
                 ) {
                     callback.onError(t)
