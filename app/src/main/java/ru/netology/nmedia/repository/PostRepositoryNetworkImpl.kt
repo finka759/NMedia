@@ -1,26 +1,13 @@
 package ru.netology.nmedia.repository
 
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import okhttp3.*
-import okio.IOException
 import ru.netology.nmedia.api.PostApi
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import ru.netology.nmedia.BuildConfig.BASE_URL
 import ru.netology.nmedia.dto.Post
-import java.util.concurrent.TimeUnit
+
 
 class PostRepositoryNetworkImpl : PostRepository {
-
-    private val client = OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .build()
-
-    private val gson = Gson()
-    private val typeToken = object : TypeToken<List<Post>>() {}
-    private val typeToken2 = object : TypeToken<Post>() {}
 
     override fun getAllAsync(callback: PostRepository.PostCallback<List<Post>>) {
 
@@ -103,23 +90,24 @@ class PostRepositoryNetworkImpl : PostRepository {
     }
 
     override fun removeById(id: Long, callback: PostRepository.PostCallback<Unit>) {
-        val request: Request = Request.Builder()
-            .delete()
-            .url("${BASE_URL}/api/slow/posts/$id")
-            .build()
+        PostApi.service.removeById(id)
+            .enqueue(object : Callback<Unit> {
+                override fun onResponse(call: Call<Unit>, response: Response<Unit>) {
+                    if (!response.isSuccessful) {
+                        when (response.code()) {
+                            404 -> callback.onError(RuntimeException("Post not found"))
+                            500 -> callback.onError(RuntimeException("Server error"))
+                            else -> callback.onError(RuntimeException("Error: ${response.code()}"))
+                        }
+                        return
+                    }
+                    callback.onSuccess(Unit)
+                }
 
-        client.newCall(request).enqueue(object : okhttp3.Callback {
-
-            override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
-                TODO("Not yet implemented")
-            }
-
-            override fun onFailure(call: okhttp3.Call, e: IOException) {
-                callback.onError(e)
-            }
-        })
-
-
+                override fun onFailure(call: Call<Unit>, e: Throwable) {
+                    callback.onError(e)
+                }
+            })
     }
 
     override fun save(post: Post, callback: PostRepository.PostCallback<Post>) {
