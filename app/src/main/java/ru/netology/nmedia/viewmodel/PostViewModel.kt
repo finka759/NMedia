@@ -91,7 +91,6 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 _data.value = refreshState.copy(posts = updatedPosts)
 
             } catch (e: Exception) {
-
                 _data.value = currentState
             }
         }
