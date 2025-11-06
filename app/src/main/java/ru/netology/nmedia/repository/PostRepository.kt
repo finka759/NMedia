@@ -9,6 +9,6 @@ interface PostRepository {
     suspend fun getAllAsync()
     suspend fun save(post: Post): Post
     suspend fun removeById(id: Long)
-    suspend fun like(id: Long, likedByMe: Boolean): Post
+    suspend fun like(id: Long, likeByMe: Boolean): Post
 
 }

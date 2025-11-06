@@ -72,7 +72,10 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         Log.d("MyTag", "PostViewModel.like called for Post ID: $id")
 
         val currentState = data.value ?: return
-        Log.d("MyTag", "ViewModel: currentState is not null. Posts count: ${currentState.posts.size}")
+        Log.d(
+            "MyTag",
+            "ViewModel: currentState is not null. Posts count: ${currentState.posts.size}"
+        )
 
         val posts = currentState.posts
         val post = posts.find { it.id == id } ?: return
@@ -91,6 +94,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 _data.value = refreshState.copy(posts = updatedPosts)
 
             } catch (e: Exception) {
+                _state.value = FeedModelState(error = true, likeError = true)
                 _data.value = currentState
             }
         }
@@ -102,20 +106,15 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 repository.removeById(id)
             } catch (e: Exception) {
-                _state.value = FeedModelState(error = true)
+                _state.value = FeedModelState(error = true, removeErrorPostId = id)
             }
         }
+    }
 
-//        val currentState = _data.value ?: return
-//        _data.postValue(currentState.copy(posts = currentState.posts.filter { it.id != id }))
-//        repository.removeById(id, object : PostRepository.PostCallback<Unit> {
-//            override fun onSuccess(result: Unit) {
-//            }
-//            override fun onError(error: Throwable) {
-//                _data.postValue(currentState)
-//            }
-//        })
-
+    fun retryRemoveById(id: Long?) {
+        if (id == null) return
+        _state.value = FeedModelState(loading = true) // показать прогресс
+        removeById(id) // повторяем попытку удаления
     }
 
 
@@ -132,8 +131,14 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     fun save() {
         viewModelScope.launch {
             edited.value?.let {
-                repository.save(it)
-                _postCreated.value = Unit
+                try {
+                    repository.save(it)
+                    _postCreated.value = Unit
+                    gDraftContent = ""
+                } catch (e: Exception) {
+                    gDraftContent = it.content
+                    _state.value = FeedModelState(error = true)
+                }
             }
             edited.value = empty
         }
@@ -148,13 +153,13 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         edited.value = empty
     }
 
-    fun share(id: Long){
+    fun share(id: Long) {
         //TODO::
     }
 
     fun refresh() {
         viewModelScope.launch {
-            _state.value = FeedModelState( refreshing = true)
+            _state.value = FeedModelState(refreshing = true)
             try {
                 repository.getAllAsync()
                 _state.value = FeedModelState()
@@ -164,6 +169,12 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             }
 
         }
+    }
+
+    fun resetErrorState() {
+        // Берем текущее значение _state, вызываем метод сброса ошибок,
+        // и присваиваем новое состояние обратно в _state.
+        _state.value = _state.value?.resetErrors() ?: FeedModelState()
     }
 
 }

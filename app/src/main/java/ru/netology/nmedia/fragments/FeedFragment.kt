@@ -108,18 +108,33 @@ class FeedFragment : Fragment() {
 
         viewModel.data.observe(viewLifecycleOwner) { state ->
             adapter.submitList(state.posts)
-//            binding.progress.isVisible = state.loading
-//            binding.errorGroup.isVisible = state.error
             binding.emptyText.isVisible = state.empty
         }
 
         viewModel.state.observe(viewLifecycleOwner) { state ->
             binding.progress.isVisible = state.loading
-//            binding.errorGroup.isVisible = state.error
-            if (state.error) {
+            if (state.error && state.removeErrorPostId != null) {
+                Snackbar.make(binding.root, R.string.error_removing_post, Snackbar.LENGTH_LONG)
+                    .setAction(R.string.retry_loading) {
+                        // При нажатии "Повторить" вызываем новый метод во ViewModel
+                        viewModel.retryRemoveById(state.removeErrorPostId)
+                    }
+                    .show()
+                viewModel.resetErrorState()
+            }
+
+            if (state.error && state.removeErrorPostId == null && state.likeError) {
+                Snackbar.make(binding.root, R.string.error_liking_post, Snackbar.LENGTH_LONG)
+                    .show()
+                viewModel.resetErrorState()
+            }
+
+
+            if (state.error && state.removeErrorPostId == null && !state.likeError) {
                 Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
                     .setAction(R.string.retry_loading) { viewModel.loadPosts() }
                     .show()
+                viewModel.resetErrorState()
             }
             binding.swiperefresh.isRefreshing = state.refreshing
         }
@@ -127,10 +142,6 @@ class FeedFragment : Fragment() {
         binding.swiperefresh.setOnRefreshListener {
             viewModel.refresh()
         }
-
-//        binding.retryButton.setOnClickListener {
-//            viewModel.loadPosts()
-//        }
 
         return binding.root
     }

@@ -3,18 +3,22 @@ package ru.netology.nmedia.repository
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
-import androidx.room.Transaction
+
+import okio.IOException
 import ru.netology.nmedia.api.PostApi
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.entity.PostEntity
+import ru.netology.nmedia.error.ApiError
+import ru.netology.nmedia.error.NetworkError
+import ru.netology.nmedia.error.UnknownError
 
 
 class PostRepositoryNetworkImpl(
     private val dao: PostDao
 ) : PostRepository {
-    override val data: LiveData<List<Post>> = dao.getAll().map{
-        it.map (PostEntity::toDto)
+    override val data: LiveData<List<Post>> = dao.getAll().map {
+        it.map(PostEntity::toDto)
     }
 
     override fun isEmpty() = dao.isEmpty()
@@ -33,7 +37,10 @@ class PostRepositoryNetworkImpl(
         Log.d("MyTag", "Repository.getAllAsync(): STARTING NETWORK REQUEST")
         try {
             val posts = PostApi.service.getAll()
-            Log.d("MyTag", "Repository.getAllAsync(): NETWORK SUCCESS. Received ${posts.size} posts.")
+            Log.d(
+                "MyTag",
+                "Repository.getAllAsync(): NETWORK SUCCESS. Received ${posts.size} posts."
+            )
             if (posts.isNotEmpty()) { // проверка, чтобы не вызывать insert для пустого списка
                 dao.insert(posts.map(PostEntity::fromDto))
                 Log.d("MyTag", "Repository.getAllAsync(): INSERTED ${posts.size} posts into DB.")
@@ -42,7 +49,11 @@ class PostRepositoryNetworkImpl(
             }
         } catch (e: Exception) {
             // обработка любых исключений
-            Log.e("MyTag", "Repository.getAllAsync(): AN EXCEPTION OCCURRED during network request or DB operation!", e)
+            Log.e(
+                "MyTag",
+                "Repository.getAllAsync(): AN EXCEPTION OCCURRED during network request or DB operation!",
+                e
+            )
             // Важно: перебросить исключение, чтобы ViewModel мог его обработать
             throw e
         }
@@ -50,51 +61,83 @@ class PostRepositoryNetworkImpl(
     }
 
 
-//    override suspend fun save(post: Post): Post {
-//        val postFromServer = PostApi.service.save(post)
-//        dao.insert(PostEntity.fromDto(postFromServer))
-//        return postFromServer
-//    }
-
-
     override suspend fun save(post: Post): Post {
-        return if (post.id == 0L) {
-            val newPost = PostApi.service.save(post)
-            dao.insert(PostEntity.fromDto(newPost))
-            newPost
-        } else {
-            dao.updateContentById(post.id, post.content)
-            post
+        try {
+            val response = PostApi.service.save(post)
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+
+            val body = response.body() ?: throw ApiError(response.code(), response.message())
+
+            // Вставляем полученный (новый или обновленный) пост в локальную БД
+            dao.insert(PostEntity.fromDto(body))
+
+            // Возвращаем объект Post в случае успешного выполнения
+            return body
+
+        } catch (e: IOException) {
+            // Перехватываем ошибки ввода/вывода (например, проблемы с сетью)
+            throw NetworkError
+        } catch (e: Exception) {
+            // Перехватываем все остальные исключения
+            throw UnknownError
         }
     }
 
 
-    @Transaction
     override suspend fun removeById(id: Long) {
-        try {
-            PostApi.service.removeById(id)
-            dao.removeById(id) // Удаляем из БД только после успешного ответа от API
-        } catch (e: Exception) {
-            // В случае ошибки ничего не делаем, так как Room откатит транзакцию
-            throw e
+        val deletingPost = dao.getPostById(id)
+        if (deletingPost != null) {
+            dao.removeById(id)
+            try {
+                PostApi.service.removeById(id)
+            } catch (e: Exception) {
+                dao.insert(deletingPost)
+                throw e
+            }
         }
     }
 
     override suspend fun like(
         id: Long,
-        likedByMe: Boolean
+        likeByMe: Boolean
     ): Post {
 
-        Log.d("MyTag", "Repository.like called for Post ID: $id, currently liked by me: $likedByMe")
+        val post = dao.getPostById(id) ?: throw Exception("Post not found in DB")
 
-        val updatedPost = if (likedByMe) {
-            PostApi.service.dislikeById(id)
-        } else {
-            PostApi.service.likeById(id)
+        val localUpdatedPostEntity = post.copy(
+            likeByMe = !likeByMe,
+            likeCount = if (likeByMe) post.likeCount - 1 else post.likeCount + 1
+        )
+        dao.insert(localUpdatedPostEntity)
+
+        try {
+            //  Отправляем запрос на сервер
+            val postFromServer = if (likeByMe) {
+                PostApi.service.dislikeById(id)
+            } else {
+                PostApi.service.likeById(id)
+            }
+
+            // При успешном ответе сервера, обновляем БД данными с сервера
+            // (на случай расхождений, например, сервер вернул другое количество лайков)
+            dao.insert(PostEntity.fromDto(postFromServer))
+
+            // Возвращаем объект Post из сервера
+            return postFromServer
+
+        } catch (e: Exception) {
+            // Если сетевой запрос провалился:
+            Log.e("MyTag", "Repository.like(): Network error for Post ID: $id. Reverting local change.", e)
+
+            // Возвращаем исходный пост в БД, отменяя локальное изменение.
+            // Это гарантирует, что список постов в UI вернется к исходному состоянию.
+            dao.insert(post)
+
+            // Перебросываем исключение, чтобы ViewModel знала об ошибке и показала Snackbar
+            throw e
         }
-        dao.insert(PostEntity.fromDto(updatedPost))
-
-        return  updatedPost
 
     }
 
