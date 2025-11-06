@@ -23,6 +23,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.snackbar.Snackbar
 
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.util.StringArg
@@ -30,7 +31,7 @@ import ru.netology.nmedia.util.StringArg
 
 class FeedFragment : Fragment() {
 
-    companion object{
+    companion object {
         var Bundle.textArgs by StringArg
     }
 
@@ -107,13 +108,39 @@ class FeedFragment : Fragment() {
 
         viewModel.data.observe(viewLifecycleOwner) { state ->
             adapter.submitList(state.posts)
-            binding.progress.isVisible = state.loading
-            binding.errorGroup.isVisible = state.error
             binding.emptyText.isVisible = state.empty
         }
 
-        binding.retryButton.setOnClickListener {
-            viewModel.loadPosts()
+        viewModel.state.observe(viewLifecycleOwner) { state ->
+            binding.progress.isVisible = state.loading
+            if (state.error && state.removeErrorPostId != null) {
+                Snackbar.make(binding.root, R.string.error_removing_post, Snackbar.LENGTH_LONG)
+                    .setAction(R.string.retry_loading) {
+                        // При нажатии "Повторить" вызываем новый метод во ViewModel
+                        viewModel.retryRemoveById(state.removeErrorPostId)
+                    }
+                    .show()
+                viewModel.resetErrorState()
+            }
+
+            if (state.error && state.removeErrorPostId == null && state.likeError) {
+                Snackbar.make(binding.root, R.string.error_liking_post, Snackbar.LENGTH_LONG)
+                    .show()
+                viewModel.resetErrorState()
+            }
+
+
+            if (state.error && state.removeErrorPostId == null && !state.likeError) {
+                Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
+                    .setAction(R.string.retry_loading) { viewModel.loadPosts() }
+                    .show()
+                viewModel.resetErrorState()
+            }
+            binding.swiperefresh.isRefreshing = state.refreshing
+        }
+
+        binding.swiperefresh.setOnRefreshListener {
+            viewModel.refresh()
         }
 
         return binding.root

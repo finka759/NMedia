@@ -25,6 +25,7 @@
     <string name="notification_user_liked" >User %1$s liked %2$s\'s post</string>
     <string name="notification_new_post">%1$s published new post</string>
     <string name="retry_loading">Retry</string>
+    <string name="retry_deleting">Retry deleting</string>
     <string name="empty_posts">There are no posts.\nIf you create a new post, it will appear here</string>
     <string name="error_loading">Something went wrong. Try again later</string>
 
@@ -64,4 +65,6 @@
         libero vel nunc consequat, quis tincidunt nisl eleifend. Cras bibendum enim a justo luctus
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
+    <string name="error_removing_post">error removing post</string>
+    <string name="error_liking_post">error liking post</string>
 </resources>

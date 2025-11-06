@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace "ru.netology.nmedia"
-    compileSdk 36
+    compileSdk = 36
 
     defaultConfig {
         applicationId "ru.netology.nmedia"
@@ -60,6 +60,7 @@ android {
 
 dependencies {
 
+    implementation libs.androidx.swiperefreshlayout
     def room_ver = "2.7.2"
     def okhttp_version = "5.1.0"
     def okhttplogging_version = "5.1.0"
