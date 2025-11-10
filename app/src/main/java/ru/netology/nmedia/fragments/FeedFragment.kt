@@ -139,11 +139,48 @@ class FeedFragment : Fragment() {
             binding.swiperefresh.isRefreshing = state.refreshing
         }
 
+
+        viewModel.newerCount.observe(viewLifecycleOwner) { state ->
+            println(state)
+        }
+
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        // ИЗМЕНЕНИЯ ДЛЯ БАННЕРА
+        // 1. Наблюдаем за количеством новых постов
+        viewModel.newerCount.observe(viewLifecycleOwner) { count ->
+            if (count > 0) {
+                // Если есть новые посты, показываем баннер
+                binding.newPostsBannerInclude.root.visibility = View.VISIBLE
+                binding.newPostsBannerInclude.bannerText.text =
+                    getString(R.string.new_posts_available)
+            } else {
+                // Иначе скрываем баннер
+                binding.newPostsBannerInclude.root.visibility = View.GONE
+            }
+        }
+
+        // 2. Обрабатываем нажатие на баннер
+        binding.newPostsBannerInclude.root.setOnClickListener {
+            // Плавный скролл к самому началу списка
+            binding.list.smoothScrollToPosition(0)
+
+            // Запуск загрузки и сохранения новых постов в БД через ViewModel
+            viewModel.loadAndShowNewPosts()
+
+            // Баннер скроется автоматически при обновлении данных
+        }
+        // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
         binding.swiperefresh.setOnRefreshListener {
             viewModel.refresh()
         }
 
         return binding.root
     }
+
+//    override fun onDestroyView() {
+//        super.onDestroyView()
+//        binding = null // Важно очищать binding в onDestroyView для предотвращения утечек памяти
+//    }
 
 }

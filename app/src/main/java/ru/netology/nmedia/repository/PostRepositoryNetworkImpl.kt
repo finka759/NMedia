@@ -3,34 +3,56 @@ package ru.netology.nmedia.repository
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import okhttp3.Dispatcher
 
 import okio.IOException
 import ru.netology.nmedia.api.PostApi
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.entity.PostEntity
+import ru.netology.nmedia.entity.toEntity
 import ru.netology.nmedia.error.ApiError
+import ru.netology.nmedia.error.AppError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
+import kotlin.collections.map
 
 
 class PostRepositoryNetworkImpl(
     private val dao: PostDao
 ) : PostRepository {
-    override val data: LiveData<List<Post>> = dao.getAll().map {
-        it.map(PostEntity::toDto)
-    }
+
+
+//    // 1. Получение исходного Flow от DAO
+//    val rawFlow: Flow<List<Entity>> = dao.getAll()
+//
+//    // 2. Операция map внешнего Flow (преобразование списка)
+//// Мы определяем функцию-преобразователь, которую передаем в map:
+//    val transformList: (List<Entity>) -> List<Dto> = { entityList ->
+//        // Здесь мы применяем внутренний map к самому списку
+//        entityList.map { entity ->
+//            entity.toDto()
+//        }
+//    }
+//
+//    // 3. Применение функции преобразования к Flow
+//    val listFlow: Flow<List<Dto>> = rawFlow.map { transformList(it) }
+//
+//    // 4. Применение контекста выполнения
+//    override val data = listFlow.flowOn(Dispatchers.Default)
+
+
+    override val data = dao.getAll().map { it.map { it.toDto() } }
+
 
     override fun isEmpty() = dao.isEmpty()
-
-
-//    override suspend fun getAllAsync() {
-//        Log.d("MyTag", "Repository.getAllAsync(): STARTING NETWORK REQUEST") // Лог 1
-//        val posts = PostApi.service.getAll()
-//        Log.d("MyTag", "Repository.getAllAsync(): NETWORK SUCCESS. Received ${posts.size} posts.") // Лог 2
-//        dao.insert(posts.map(PostEntity::fromDto))
-//        Log.d("MyTag", "Repository.getAllAsync(): FINISHED.") // Лог 7
-//    }
 
 
     override suspend fun getAllAsync() {
@@ -103,14 +125,8 @@ class PostRepositoryNetworkImpl(
         id: Long,
         likeByMe: Boolean
     ): Post {
-
-        val post = dao.getPostById(id) ?: throw Exception("Post not found in DB")
-
-        val localUpdatedPostEntity = post.copy(
-            likeByMe = !likeByMe,
-            likeCount = if (likeByMe) post.likeCount - 1 else post.likeCount + 1
-        )
-        dao.insert(localUpdatedPostEntity)
+        // Переключаем состояние
+        dao.likeById(id)
 
         try {
             //  Отправляем запрос на сервер
@@ -129,16 +145,91 @@ class PostRepositoryNetworkImpl(
 
         } catch (e: Exception) {
             // Если сетевой запрос провалился:
-            Log.e("MyTag", "Repository.like(): Network error for Post ID: $id. Reverting local change.", e)
+            Log.e(
+                "MyTag",
+                "Repository.like(): Network error for Post ID: $id. Reverting local change.",
+                e
+            )
 
-            // Возвращаем исходный пост в БД, отменяя локальное изменение.
+            // Переключаем состояние обратно.
             // Это гарантирует, что список постов в UI вернется к исходному состоянию.
-            dao.insert(post)
+            dao.likeById(id)
 
             // Перебросываем исключение, чтобы ViewModel знала об ошибке и показала Snackbar
             throw e
         }
 
     }
+
+
+//    override fun getNewerCountWithInsert(id: Long): Flow<Int> = flow {
+//        while (true) {
+//            delay(10_000L)
+//            val response = PostApi.service.getNewer(id)
+//            if (!response.isSuccessful) {
+//                throw ApiError(response.code(), response.message())
+//            }
+//            val body = response.body() ?: throw ApiError(response.code(), response.message())
+//            dao.insert(body.toEntity())
+//            emit(body.size)
+//        }
+//    }
+//        .catch { e -> throw AppError.from(e) }
+//        .flowOn(Dispatchers.Default)
+
+
+
+
+    override suspend fun fetchAndSaveNewerPosts(id: Long): Int {
+        val response = PostApi.service.getNewer(id)
+        if (!response.isSuccessful) {
+            throw ApiError(response.code(), response.message())
+        }
+        val body = response.body() ?: emptyList()
+
+        // Сохраняем в БД сразу
+        dao.insert(body.toEntity())
+
+        return body.size
+    }
+
+    override fun getNewerCount(id: Long): Flow<Int> = flow {
+        while (true) {
+            delay(10_000L)
+            // 1. Выполняем запрос для проверки наличия новых постов
+            val response = PostApi.service.getNewer(id)
+
+            if (!response.isSuccessful) {
+                Log.e(
+                    "MyTag",
+                    "getNewerCount not geted NewerCount"
+                )
+            }
+
+            val body = response.body() ?: continue // Если тело пустое, просто продолжаем цикл
+
+            // 2. Вместо сохранения в БД сразу, мы просто эмитим количество найденных постов
+            if (body.isNotEmpty()) {
+                emit(body.size)
+            }
+            // DAO.insert() здесь больше НЕ вызывается автоматически
+        }
+    }
+        .catch { e -> e.printStackTrace() }
+        .flowOn(Dispatchers.Default) // Лучше использовать Dispatchers.IO для сетевых запросов
+
+
+    suspend fun loadAndSaveNewerPosts(id: Long) {
+        // Эта функция будет вызываться по требованию (когда пользователь нажмет на баннер)
+        val response = PostApi.service.getNewer(id)
+        if (!response.isSuccessful) {
+            throw ApiError(response.code(), response.message())
+        }
+        val body = response.body() ?: return
+
+        // Теперь здесь происходит сохранение в БД
+        dao.insert(body.toEntity())
+    }
+
 
 }

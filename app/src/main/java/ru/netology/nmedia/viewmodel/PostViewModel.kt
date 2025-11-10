@@ -7,8 +7,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.liveData
+import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Post
@@ -17,6 +22,7 @@ import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.util.SingleLiveEvent
 import ru.netology.nmedia.repository.PostRepository
 import ru.netology.nmedia.repository.PostRepositoryNetworkImpl
+
 
 private val empty = Post(
     id = 0,
@@ -36,11 +42,41 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     private val _state = MutableLiveData(FeedModelState())
     val state: LiveData<FeedModelState>
         get() = _state
+
+
     private val _data = MutableLiveData(FeedModel())
+//    val data: LiveData<FeedModel> =
+//        repository.data.asFlow()
+//            .combine(repository.isEmpty().asFlow(), ::FeedModel)
+//            .asLiveData()
+
+
+
+//    val data: LiveData<FeedModel> = liveData {
+//        // Внутри liveData builder мы можем собирать (collect) Flow
+//        repository.data.collect { posts ->
+//            // И можем получить текущее значение из LiveData с помощью getValue()
+//            val isEmpty = repository.isEmpty().value ?: false
+//
+//            // Затем мы эмитим новое значение в нашу итоговую LiveData
+//            emit(FeedModel(posts, isEmpty))
+//        }
+//    }
+
+
     val data: LiveData<FeedModel> =
-        repository.data.asFlow()
-            .combine(repository.isEmpty().asFlow(), ::FeedModel)
-            .asLiveData()
+        repository.data.map { list: List<Post> -> FeedModel(list, list.isEmpty()) }
+            .catch { it.printStackTrace() }
+            .asLiveData(Dispatchers.Default)
+
+
+    val newerCount: LiveData<Int> = data.switchMap {
+        repository.getNewerCount(it.posts.firstOrNull()?.id ?: 0L)
+            .catch { e -> e.printStackTrace() }
+            .asLiveData(Dispatchers.Default)
+    }
+
+
 
     private val edited = MutableLiveData(empty)
     private val _postCreated = SingleLiveEvent<Unit>()
@@ -64,6 +100,23 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 _state.value = FeedModelState(error = true)
             }
 
+        }
+    }
+
+    fun loadAndShowNewPosts() {
+        viewModelScope.launch {
+            // Получаем ID самого свежего поста в текущем списке
+            val latestId = data.value?.posts?.firstOrNull()?.id ?: 0L
+
+            try {
+                // Вызываем suspend функцию репозитория, которая скачает посты и сразу сохранит их в БД
+                repository.fetchAndSaveNewerPosts(latestId)
+
+                // Так как посты сохранены в БД, LiveData 'data' автоматически обновится,
+                // а 'newerCount' автоматически обновит счетчик до 0 (или сколько там еще новых)
+            } catch (e: Exception) {
+                _state.value = FeedModelState(error = true)
+            }
         }
     }
 

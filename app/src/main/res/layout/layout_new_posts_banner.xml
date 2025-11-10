@@ -1,0 +1,22 @@
+<!-- layout_new_posts_banner.xml -->
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/banner_card_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true"
+    app:cardBackgroundColor="?attr/colorPrimaryContainer"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="4dp">
+
+    <TextView
+        android:id="@+id/banner_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="Загружено новых постов: 5. Нажмите, чтобы посмотреть."
+        android:textAppearance="?attr/textAppearanceBody2"
+        android:textColor="?attr/colorOnPrimaryContainer" />
+
+</com.google.android.material.card.MaterialCardView>
