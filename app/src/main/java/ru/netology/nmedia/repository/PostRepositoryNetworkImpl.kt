@@ -1,8 +1,6 @@
 package ru.netology.nmedia.repository
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.map
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -10,8 +8,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import okhttp3.Dispatcher
-
 import okio.IOException
 import ru.netology.nmedia.api.PostApi
 import ru.netology.nmedia.dao.PostDao
