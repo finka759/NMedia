@@ -1,6 +1,7 @@
 package ru.netology.nmedia.model
 
 import ru.netology.nmedia.dto.Post
+import kotlin.Boolean
 
 data class FeedModel(
     val posts: List<Post> = emptyList(),
@@ -12,7 +13,7 @@ data class FeedModelState(
     val error: Boolean = false,
     val refreshing: Boolean = false,
     val removeErrorPostId: Long? = null, // поле для ID поста с ошибкой удаления(для повторного удаления в случае ошибки)
-    val likeError: Boolean = false
+    val likeError: Boolean = false,
 ){
     /**
      * Создает новое состояние с выключенными флагами ошибок.
@@ -20,7 +21,7 @@ data class FeedModelState(
     fun resetErrors(): FeedModelState = this.copy(
         error = false,
         removeErrorPostId = null,
-        likeError = false
+        likeError = false,
     )
 }
 

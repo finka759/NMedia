@@ -12,14 +12,14 @@
         android:layout_height="match_parent"
         tools:context=".fragments.FeedFragment">
 
+
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/swiperefresh"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="1.0"
-            tools:layout_editor_absoluteX="29dp">
+            app:layout_constraintTop_toTopOf="parent">
+
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/list"
@@ -58,15 +58,29 @@
             app:layout_constraintTop_toTopOf="parent" />
 
 
+        <include
+            android:id="@+id/new_posts_banner_include"
+            layout="@layout/layout_new_posts_banner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         android:contentDescription="@string/add_post"
-        android:layout_gravity="bottom|end"
         app:srcCompat="@drawable/ic_add_24" />
 
 

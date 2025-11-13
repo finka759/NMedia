@@ -67,4 +67,5 @@
     </string>
     <string name="error_removing_post">error removing post</string>
     <string name="error_liking_post">error liking post</string>
+    <string name="new_posts_available">New posts avalible!</string>
 </resources>

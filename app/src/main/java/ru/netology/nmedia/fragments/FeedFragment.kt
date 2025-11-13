@@ -2,10 +2,6 @@ package ru.netology.nmedia.fragments
 
 import android.os.Bundle
 
-//import androidx.activity.enableEdgeToEdge
-//import androidx.core.view.ViewCompat
-//import androidx.core.view.WindowInsetsCompat
-
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.OnInteractorListener
 import ru.netology.nmedia.viewmodel.PostViewModel
@@ -100,7 +96,6 @@ class FeedFragment : Fragment() {
                     Intent.createChooser(intent, getString(R.string.play_web_video))
                 startActivity(playWebVideoIntent)
             }
-
         }
         )
 
@@ -129,7 +124,6 @@ class FeedFragment : Fragment() {
                 viewModel.resetErrorState()
             }
 
-
             if (state.error && state.removeErrorPostId == null && !state.likeError) {
                 Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
                     .setAction(R.string.retry_loading) { viewModel.loadPosts() }
@@ -139,11 +133,33 @@ class FeedFragment : Fragment() {
             binding.swiperefresh.isRefreshing = state.refreshing
         }
 
+        viewModel.newerCount.observe(viewLifecycleOwner) { state ->
+            println(state)
+        }
+
+        // Наблюдаем за количеством новых постов
+        viewModel.newerCount.observe(viewLifecycleOwner) { count ->
+            if (count > 0) {
+                // Если есть новые посты, показываем баннер
+                binding.newPostsBannerInclude.root.visibility = View.VISIBLE
+                binding.newPostsBannerInclude.bannerText.text =
+                    getString(R.string.new_posts_available)
+            } else {
+                // Иначе скрываем баннер
+                binding.newPostsBannerInclude.root.visibility = View.GONE
+            }
+        }
+        // Обрабатываем нажатие на баннер
+        binding.newPostsBannerInclude.root.setOnClickListener {
+            // Плавный скролл к самому началу списка
+            binding.list.smoothScrollToPosition(0)
+            binding.newPostsBannerInclude.root.visibility = View.GONE
+        }
+
         binding.swiperefresh.setOnRefreshListener {
             viewModel.refresh()
         }
 
         return binding.root
     }
-
 }
