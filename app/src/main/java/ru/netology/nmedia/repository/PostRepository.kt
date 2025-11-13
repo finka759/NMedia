@@ -10,8 +10,6 @@ interface PostRepository {
     suspend fun getAllAsync()
 
     fun getNewerCount(id: Long): Flow<Int>
-
-    suspend fun fetchAndSaveNewerPosts(id: Long): Int
     suspend fun save(post: Post): Post
     suspend fun removeById(id: Long)
     suspend fun like(id: Long, likeByMe: Boolean): Post

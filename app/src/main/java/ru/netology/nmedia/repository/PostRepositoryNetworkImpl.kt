@@ -158,78 +158,23 @@ class PostRepositoryNetworkImpl(
             // Перебросываем исключение, чтобы ViewModel знала об ошибке и показала Snackbar
             throw e
         }
-
     }
 
-
-//    override fun getNewerCountWithInsert(id: Long): Flow<Int> = flow {
-//        while (true) {
-//            delay(10_000L)
-//            val response = PostApi.service.getNewer(id)
-//            if (!response.isSuccessful) {
-//                throw ApiError(response.code(), response.message())
-//            }
-//            val body = response.body() ?: throw ApiError(response.code(), response.message())
-//            dao.insert(body.toEntity())
-//            emit(body.size)
-//        }
-//    }
-//        .catch { e -> throw AppError.from(e) }
-//        .flowOn(Dispatchers.Default)
-
-
-
-
-    override suspend fun fetchAndSaveNewerPosts(id: Long): Int {
-        val response = PostApi.service.getNewer(id)
-        if (!response.isSuccessful) {
-            throw ApiError(response.code(), response.message())
-        }
-        val body = response.body() ?: emptyList()
-
-        // Сохраняем в БД сразу
-        dao.insert(body.toEntity())
-
-        return body.size
-    }
 
     override fun getNewerCount(id: Long): Flow<Int> = flow {
         while (true) {
             delay(10_000L)
-            // 1. Выполняем запрос для проверки наличия новых постов
             val response = PostApi.service.getNewer(id)
-
             if (!response.isSuccessful) {
-                Log.e(
-                    "MyTag",
-                    "getNewerCount not geted NewerCount"
-                )
+                throw ApiError(response.code(), response.message())
             }
 
-            val body = response.body() ?: continue // Если тело пустое, просто продолжаем цикл
-
-            // 2. Вместо сохранения в БД сразу, мы просто эмитим количество найденных постов
-            if (body.isNotEmpty()) {
-                emit(body.size)
-            }
-            // DAO.insert() здесь больше НЕ вызывается автоматически
+            val body = response.body() ?: throw ApiError(response.code(), response.message())
+            dao.insert(body.toEntity())
+            emit(body.size)
         }
     }
-        .catch { e -> e.printStackTrace() }
-        .flowOn(Dispatchers.Default) // Лучше использовать Dispatchers.IO для сетевых запросов
-
-
-    suspend fun loadAndSaveNewerPosts(id: Long) {
-        // Эта функция будет вызываться по требованию (когда пользователь нажмет на баннер)
-        val response = PostApi.service.getNewer(id)
-        if (!response.isSuccessful) {
-            throw ApiError(response.code(), response.message())
-        }
-        val body = response.body() ?: return
-
-        // Теперь здесь происходит сохранение в БД
-        dao.insert(body.toEntity())
-    }
-
+        .catch { e -> throw AppError.from(e) }
+        .flowOn(Dispatchers.Default)
 
 }

@@ -2,10 +2,6 @@ package ru.netology.nmedia.fragments
 
 import android.os.Bundle
 
-//import androidx.activity.enableEdgeToEdge
-//import androidx.core.view.ViewCompat
-//import androidx.core.view.WindowInsetsCompat
-
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.OnInteractorListener
 import ru.netology.nmedia.viewmodel.PostViewModel
@@ -100,7 +96,6 @@ class FeedFragment : Fragment() {
                     Intent.createChooser(intent, getString(R.string.play_web_video))
                 startActivity(playWebVideoIntent)
             }
-
         }
         )
 
@@ -129,7 +124,6 @@ class FeedFragment : Fragment() {
                 viewModel.resetErrorState()
             }
 
-
             if (state.error && state.removeErrorPostId == null && !state.likeError) {
                 Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
                     .setAction(R.string.retry_loading) { viewModel.loadPosts() }
@@ -139,14 +133,11 @@ class FeedFragment : Fragment() {
             binding.swiperefresh.isRefreshing = state.refreshing
         }
 
-
         viewModel.newerCount.observe(viewLifecycleOwner) { state ->
             println(state)
         }
 
-// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        // ИЗМЕНЕНИЯ ДЛЯ БАННЕРА
-        // 1. Наблюдаем за количеством новых постов
+        // Наблюдаем за количеством новых постов
         viewModel.newerCount.observe(viewLifecycleOwner) { count ->
             if (count > 0) {
                 // Если есть новые посты, показываем баннер
@@ -158,18 +149,12 @@ class FeedFragment : Fragment() {
                 binding.newPostsBannerInclude.root.visibility = View.GONE
             }
         }
-
-        // 2. Обрабатываем нажатие на баннер
+        // Обрабатываем нажатие на баннер
         binding.newPostsBannerInclude.root.setOnClickListener {
             // Плавный скролл к самому началу списка
             binding.list.smoothScrollToPosition(0)
-
-            // Запуск загрузки и сохранения новых постов в БД через ViewModel
-            viewModel.loadAndShowNewPosts()
-
-            // Баннер скроется автоматически при обновлении данных
+            binding.newPostsBannerInclude.root.visibility = View.GONE
         }
-        // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
         binding.swiperefresh.setOnRefreshListener {
             viewModel.refresh()
@@ -177,10 +162,4 @@ class FeedFragment : Fragment() {
 
         return binding.root
     }
-
-//    override fun onDestroyView() {
-//        super.onDestroyView()
-//        binding = null // Важно очищать binding в onDestroyView для предотвращения утечек памяти
-//    }
-
 }

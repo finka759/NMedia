@@ -14,7 +14,6 @@ data class FeedModelState(
     val refreshing: Boolean = false,
     val removeErrorPostId: Long? = null, // поле для ID поста с ошибкой удаления(для повторного удаления в случае ошибки)
     val likeError: Boolean = false,
-    val findedNewPosts: Boolean = false // флаг обнаружены новые посты
 ){
     /**
      * Создает новое состояние с выключенными флагами ошибок.
@@ -23,7 +22,6 @@ data class FeedModelState(
         error = false,
         removeErrorPostId = null,
         likeError = false,
-        findedNewPosts = false
     )
 }
 

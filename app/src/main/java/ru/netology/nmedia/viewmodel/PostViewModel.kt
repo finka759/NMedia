@@ -45,11 +45,10 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
 
     private val _data = MutableLiveData(FeedModel())
-//    val data: LiveData<FeedModel> =
-//        repository.data.asFlow()
-//            .combine(repository.isEmpty().asFlow(), ::FeedModel)
-//            .asLiveData()
-
+    val data: LiveData<FeedModel> =
+        repository.data
+            .combine(repository.isEmpty().asFlow(), ::FeedModel)
+            .asLiveData()
 
 
 //    val data: LiveData<FeedModel> = liveData {
@@ -64,10 +63,10 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 //    }
 
 
-    val data: LiveData<FeedModel> =
-        repository.data.map { list: List<Post> -> FeedModel(list, list.isEmpty()) }
-            .catch { it.printStackTrace() }
-            .asLiveData(Dispatchers.Default)
+//    val data: LiveData<FeedModel> =
+//        repository.data.map { list: List<Post> -> FeedModel(list, list.isEmpty()) }
+//            .catch { it.printStackTrace() }
+//            .asLiveData(Dispatchers.Default)
 
 
     val newerCount: LiveData<Int> = data.switchMap {
@@ -75,7 +74,6 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             .catch { e -> e.printStackTrace() }
             .asLiveData(Dispatchers.Default)
     }
-
 
 
     private val edited = MutableLiveData(empty)
@@ -103,22 +101,6 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun loadAndShowNewPosts() {
-        viewModelScope.launch {
-            // Получаем ID самого свежего поста в текущем списке
-            val latestId = data.value?.posts?.firstOrNull()?.id ?: 0L
-
-            try {
-                // Вызываем suspend функцию репозитория, которая скачает посты и сразу сохранит их в БД
-                repository.fetchAndSaveNewerPosts(latestId)
-
-                // Так как посты сохранены в БД, LiveData 'data' автоматически обновится,
-                // а 'newerCount' автоматически обновит счетчик до 0 (или сколько там еще новых)
-            } catch (e: Exception) {
-                _state.value = FeedModelState(error = true)
-            }
-        }
-    }
 
     fun like(id: Long) {
 
