@@ -26,8 +26,3 @@ class SingleLiveEvent<T> : MutableLiveData<T>() {
         super.setValue(t)
     }
 }
-
-// Функция-расширение для удобного вызова события типа Unit
-fun SingleLiveEvent<Unit>.call() {
-    value = Unit
-}

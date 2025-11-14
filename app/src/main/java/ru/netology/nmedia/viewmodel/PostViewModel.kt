@@ -20,8 +20,6 @@ import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.util.SingleLiveEvent
 import ru.netology.nmedia.repository.PostRepository
 import ru.netology.nmedia.repository.PostRepositoryNetworkImpl
-import ru.netology.nmedia.util.call
-
 
 private val empty = Post(
     id = 0,
