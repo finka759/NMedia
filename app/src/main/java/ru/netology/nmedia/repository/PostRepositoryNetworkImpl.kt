@@ -45,11 +45,14 @@ class PostRepositoryNetworkImpl(
 //    override val data = listFlow.flowOn(Dispatchers.Default)
 
 
-    override val data = dao.getAll().map { it.map { it.toDto() } }
-
+    override val data = dao.getAllVisible().map { it.map { it.toDto() } }
 
     override fun isEmpty() = dao.isEmpty()
 
+    // Отметить все невидимые посты как видимые
+    override suspend fun showAllInvisible() {
+        dao.showAllInvisible()
+    }
 
     override suspend fun getAllAsync() {
         Log.d("MyTag", "Repository.getAllAsync(): STARTING NETWORK REQUEST")
@@ -60,7 +63,8 @@ class PostRepositoryNetworkImpl(
                 "Repository.getAllAsync(): NETWORK SUCCESS. Received ${posts.size} posts."
             )
             if (posts.isNotEmpty()) { // проверка, чтобы не вызывать insert для пустого списка
-                dao.insert(posts.map(PostEntity::fromDto))
+                // вставляем новые посты как НЕВИДИМЫЕ (false)
+                dao.insert(posts.toEntity(isVisible = false))
                 Log.d("MyTag", "Repository.getAllAsync(): INSERTED ${posts.size} posts into DB.")
             } else {
                 Log.d("MyTag", "Repository.getAllAsync(): API returned 0 posts. Nothing to insert.")
@@ -85,15 +89,12 @@ class PostRepositoryNetworkImpl(
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
-
             val body = response.body() ?: throw ApiError(response.code(), response.message())
-
             // Вставляем полученный (новый или обновленный) пост в локальную БД
-            dao.insert(PostEntity.fromDto(body))
-
+            //Пост, созданный локально, сразу ВИДИМ (true)
+            dao.insert(PostEntity.fromDto(body, isVisible = true))
             // Возвращаем объект Post в случае успешного выполнения
             return body
-
         } catch (e: IOException) {
             // Перехватываем ошибки ввода/вывода (например, проблемы с сетью)
             throw NetworkError
@@ -102,7 +103,6 @@ class PostRepositoryNetworkImpl(
             throw UnknownError
         }
     }
-
 
     override suspend fun removeById(id: Long) {
         val deletingPost = dao.getPostById(id)
@@ -131,11 +131,9 @@ class PostRepositoryNetworkImpl(
             } else {
                 PostApi.service.likeById(id)
             }
-
             // При успешном ответе сервера, обновляем БД данными с сервера
             // (на случай расхождений, например, сервер вернул другое количество лайков)
             dao.insert(PostEntity.fromDto(postFromServer))
-
             // Возвращаем объект Post из сервера
             return postFromServer
 
@@ -146,11 +144,9 @@ class PostRepositoryNetworkImpl(
                 "Repository.like(): Network error for Post ID: $id. Reverting local change.",
                 e
             )
-
             // Переключаем состояние обратно.
             // Это гарантирует, что список постов в UI вернется к исходному состоянию.
             dao.likeById(id)
-
             // Перебросываем исключение, чтобы ViewModel знала об ошибке и показала Snackbar
             throw e
         }
@@ -164,9 +160,9 @@ class PostRepositoryNetworkImpl(
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
-
             val body = response.body() ?: throw ApiError(response.code(), response.message())
-            dao.insert(body.toEntity())
+            // Вставляем свежие посты как НЕВИДИМЫЕ (false)
+            dao.insert(body.toEntity(isVisible = false))
             emit(body.size)
         }
     }

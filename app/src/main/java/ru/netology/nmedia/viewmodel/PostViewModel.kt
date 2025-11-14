@@ -20,15 +20,15 @@ import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.util.SingleLiveEvent
 import ru.netology.nmedia.repository.PostRepository
 import ru.netology.nmedia.repository.PostRepositoryNetworkImpl
+import ru.netology.nmedia.util.call
 
 
 private val empty = Post(
     id = 0,
     author = "",
-    content = "",
     published = "",
-    likes = 0,
-    likedByMe = false
+    content = "",
+    isVisible = true // По умолчанию в DTO пусть будет true
 )
 
 class PostViewModel(application: Application) : AndroidViewModel(application) {
@@ -42,7 +42,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         get() = _state
 
 
-    private val _data = MutableLiveData(FeedModel())
+    //    private val _data = MutableLiveData(FeedModel())
     val data: LiveData<FeedModel> =
         repository.data
             .combine(repository.isEmpty().asFlow(), ::FeedModel)
@@ -73,7 +73,6 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             .asLiveData(Dispatchers.Default)
     }
 
-
     private val edited = MutableLiveData(empty)
     private val _postCreated = SingleLiveEvent<Unit>()
     val postCreated: LiveData<Unit>
@@ -84,18 +83,33 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     }
 
 
+    /**
+     * Функция, вызываемая при нажатии на баннер "Новые посты".
+     * Отмечает все невидимые посты как видимые и запускает скролл.
+     */
+    fun showNewPosts() {
+        viewModelScope.launch {
+            try {
+                repository.showAllInvisible() // Обновляем БД: isVisible = true для всех новых
+            } catch (e: Exception) {
+                _state.value = FeedModelState(error = true)
+            }
+        }
+    }
+
+
     fun loadPosts() {
         Log.d("MyTag", "PostViewModel.loadPosts() called")
         viewModelScope.launch {
             _state.value = FeedModelState(loading = true)
             try {
                 repository.getAllAsync()
+                repository.showAllInvisible()
                 _state.value = FeedModelState()
             } catch (e: Exception) {
                 e.printStackTrace()
                 _state.value = FeedModelState(error = true)
             }
-
         }
     }
 
@@ -118,17 +132,10 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
 
-                val updatedPost = repository.like(id, likedByMe)
-
-                val refreshState = _data.value ?: return@launch
-                val updatedPosts = refreshState.posts.map {
-                    if (it.id == updatedPost.id) updatedPost else it
-                }
-                _data.value = refreshState.copy(posts = updatedPosts)
+                repository.like(id, likedByMe)
 
             } catch (e: Exception) {
                 _state.value = FeedModelState(error = true, likeError = true)
-                _data.value = currentState
             }
         }
     }
@@ -195,6 +202,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             _state.value = FeedModelState(refreshing = true)
             try {
                 repository.getAllAsync()
+                repository.showAllInvisible()
                 _state.value = FeedModelState()
             } catch (e: Exception) {
                 e.printStackTrace()

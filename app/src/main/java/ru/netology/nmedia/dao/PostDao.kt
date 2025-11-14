@@ -14,6 +14,14 @@ interface PostDao {
     @Query("SELECT * FROM Post_Entity ORDER BY id DESC")
     fun getAll(): Flow<List<PostEntity>>
 
+    // запрос, чтобы выбирать только видимые посты, отсортированные по ID убыванию
+    @Query("SELECT * FROM Post_Entity WHERE isVisible = 1 ORDER BY id DESC")
+    fun getAllVisible(): Flow<List<PostEntity>>
+
+    // Добавляем метод для пометки всех невидимых постов как видимых
+    @Query("UPDATE Post_Entity SET isVisible = 1 WHERE isVisible = 0")
+    suspend fun showAllInvisible()
+
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(post: PostEntity)
@@ -23,10 +31,6 @@ interface PostDao {
 
     @Query("UPDATE Post_Entity SET content = :content WHERE id = :id")
     suspend fun updateContentById(id: Long, content: String)
-
-//    suspend fun save(post: PostEntity){
-//        if (post.id == 0L) insert(post) else updateContentById(post.id, post.content)
-//    }
 
     @Query("""
         UPDATE Post_Entity SET

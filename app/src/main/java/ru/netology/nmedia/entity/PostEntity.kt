@@ -17,6 +17,8 @@ data class PostEntity(
     val viewCount: Int = 0,
     val videoUrl: String? = null,
     var authorAvatar: String? = null,
+    // Добавляем новое поле: по умолчанию false (невидимый)
+    val isVisible: Boolean = false
 ) {
     fun toDto() = Post(
         id = id,
@@ -29,10 +31,11 @@ data class PostEntity(
         viewCount = viewCount,
         videoUrl = videoUrl,
         authorAvatar = authorAvatar,
+        isVisible = isVisible
     )
 
     companion object {
-        fun fromDto(dto: Post) =
+        fun fromDto(dto: Post, isVisible: Boolean = false) =
             PostEntity(
                 id = dto.id,
                 author = dto.author,
@@ -43,10 +46,12 @@ data class PostEntity(
                 shareCount = dto.shareCount,
                 viewCount = dto.viewCount,
                 videoUrl = dto.videoUrl,
-                authorAvatar = dto.authorAvatar
+                authorAvatar = dto.authorAvatar,
+                isVisible = isVisible // Устанавливаем видимость
             )
     }
 }
 
 fun List<PostEntity>.toDto(): List<Post> = map(PostEntity::toDto)
-fun List<Post>.toEntity(): List<PostEntity> = map(PostEntity::fromDto)
+//fun List<Post>.toEntity(): List<PostEntity> = map(PostEntity::fromDto)
+fun List<Post>.toEntity(isVisible: Boolean = false): List<PostEntity> = map { PostEntity.fromDto(it, isVisible) }
