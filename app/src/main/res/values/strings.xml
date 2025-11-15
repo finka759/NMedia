@@ -20,7 +20,6 @@
     <string name="previous" translatable="false">Previous</string>
     <string name="channel_remote_name">Server notifications</string>
     <string name="channel_remote_description">Notifications from remote server</string>
-
     <string name="google_play_unavailable">Google Api Unavailable</string>
     <string name="notification_user_liked" >User %1$s liked %2$s\'s post</string>
     <string name="notification_new_post">%1$s published new post</string>
@@ -28,7 +27,9 @@
     <string name="retry_deleting">Retry deleting</string>
     <string name="empty_posts">There are no posts.\nIf you create a new post, it will appear here</string>
     <string name="error_loading">Something went wrong. Try again later</string>
-
+    <string name="error_removing_post">error removing post</string>
+    <string name="error_liking_post">error liking post</string>
+    <string name="new_posts_available">New posts able! ▲</string>
     <string name="lorem_ipsum" translatable="false">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
         volutpat, dolor id interdum ullamcorper, risus dolor egestas lectus, sit amet mattis purus
@@ -65,7 +66,4 @@
         libero vel nunc consequat, quis tincidunt nisl eleifend. Cras bibendum enim a justo luctus
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
-    <string name="error_removing_post">error removing post</string>
-    <string name="error_liking_post">error liking post</string>
-    <string name="new_posts_available">New posts avalible!</string>
 </resources>

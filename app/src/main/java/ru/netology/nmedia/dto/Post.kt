@@ -1,6 +1,6 @@
 package ru.netology.nmedia.dto
 
-data class Post (
+data class Post(
     val id: Long,
     val author: String,
     val published: String,
@@ -11,4 +11,5 @@ data class Post (
     val viewCount: Int = 0,
     val videoUrl: String? = null,
     var authorAvatar: String? = null,
+    val isVisible: Boolean = false,
 )

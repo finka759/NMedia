@@ -31,6 +31,9 @@ class FeedFragment : Fragment() {
         var Bundle.textArgs by StringArg
     }
 
+    // Флаг для отслеживания необходимости скролла после обновления данных
+    private var shouldScrollToTop = false
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -102,7 +105,15 @@ class FeedFragment : Fragment() {
         binding.list.adapter = adapter
 
         viewModel.data.observe(viewLifecycleOwner) { state ->
-            adapter.submitList(state.posts)
+            val listWasEmpty = adapter.itemCount == 0
+            adapter.submitList(state.posts){
+                // Callback submitList выполняется после того, как список отрисован
+                // Если список был пуст ИЛИ если флаг установлен, то скроллим
+                if (shouldScrollToTop || listWasEmpty) {
+                    binding.list.scrollToPosition(0)
+                    shouldScrollToTop = false // Сбрасываем флаг после скролла
+                }
+            }
             binding.emptyText.isVisible = state.empty
         }
 
@@ -149,12 +160,17 @@ class FeedFragment : Fragment() {
                 binding.newPostsBannerInclude.root.visibility = View.GONE
             }
         }
-        // Обрабатываем нажатие на баннер
+
+        // Обрабатываем нажатие на баннер, вызывая ViewModel
         binding.newPostsBannerInclude.root.setOnClickListener {
-            // Плавный скролл к самому началу списка
-            binding.list.smoothScrollToPosition(0)
+            // Устанавливаем флаг, что нужно скроллить после обновления данных
+            shouldScrollToTop = true
             binding.newPostsBannerInclude.root.visibility = View.GONE
+            // Запускаем обновление данных во ViewModel
+            viewModel.showNewPosts()
         }
+
+
 
         binding.swiperefresh.setOnRefreshListener {
             viewModel.refresh()
