@@ -133,7 +133,8 @@ class PostRepositoryNetworkImpl(
             }
             // При успешном ответе сервера, обновляем БД данными с сервера
             // (на случай расхождений, например, сервер вернул другое количество лайков)
-            dao.insert(PostEntity.fromDto(postFromServer))
+//            dao.insert(PostEntity.fromDto(postFromServer))
+            dao.insert(PostEntity.fromDto(postFromServer, isVisible = true))
             // Возвращаем объект Post из сервера
             return postFromServer
 
