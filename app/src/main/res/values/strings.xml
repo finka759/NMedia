@@ -30,6 +30,8 @@
     <string name="error_removing_post">error removing post</string>
     <string name="error_liking_post">error liking post</string>
     <string name="new_posts_available">New posts able! ▲</string>
+    <string name="menu_save">Save</string>
+    <string name="image_pick_error" translatable="false">Image pick error</string>
     <string name="lorem_ipsum" translatable="false">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
         volutpat, dolor id interdum ullamcorper, risus dolor egestas lectus, sit amet mattis purus
@@ -66,4 +68,5 @@
         libero vel nunc consequat, quis tincidunt nisl eleifend. Cras bibendum enim a justo luctus
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
+    <string name="description_post_image">posts image</string>
 </resources>

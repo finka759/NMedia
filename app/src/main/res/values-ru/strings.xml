@@ -26,4 +26,6 @@
     <string name="retry_deleting">повторить удаление</string>
     <string name="error_liking_post">ошибка сохранения like</string>
     <string name="new_posts_available">Свежие записи ! ▲</string>
+    <string name="menu_save">Сохранить</string>
+    <string name="description_post_image">изображение к посту</string>
 </resources>

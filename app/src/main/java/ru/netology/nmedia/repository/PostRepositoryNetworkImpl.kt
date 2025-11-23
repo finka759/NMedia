@@ -8,16 +8,22 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import okio.IOException
 import ru.netology.nmedia.api.PostApi
 import ru.netology.nmedia.dao.PostDao
+import ru.netology.nmedia.dto.Attachment
+import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.toEntity
+import ru.netology.nmedia.enumeration.AttachmentType
 import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.AppError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
+import java.io.File
 import kotlin.collections.map
 
 
@@ -103,6 +109,48 @@ class PostRepositoryNetworkImpl(
             throw UnknownError
         }
     }
+
+
+    override suspend fun saveWithAttachment(post: Post, photo: File?) {
+        try {
+            val media = photo?.let {
+                upload(it)
+            }
+
+            val postWithAttachment = post.copy(
+                attachment = media?.let {
+                    Attachment(it.id, type = AttachmentType.IMAGE)
+                })
+
+
+            val response = PostApi.service.save(postWithAttachment)
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+            val body = response.body() ?: throw ApiError(response.code(), response.message())
+
+            dao.insert(PostEntity.fromDto(body, isVisible = true))
+
+
+        } catch (e: IOException) {
+
+            throw NetworkError
+        } catch (e: Exception) {
+
+            throw UnknownError
+        }
+    }
+
+    private suspend fun upload(file: File): Media =
+        PostApi.service.upload(
+            MultipartBody.Part.createFormData(
+                "file",
+                file.name,
+                file.asRequestBody(),
+            )
+        )
+
+
 
     override suspend fun removeById(id: Long) {
         val deletingPost = dao.getPostById(id)

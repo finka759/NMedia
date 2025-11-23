@@ -1,7 +1,9 @@
 package ru.netology.nmedia.entity
 
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.dto.Post
 
 @Entity(tableName = "Post_Entity")
@@ -18,7 +20,9 @@ data class PostEntity(
     val videoUrl: String? = null,
     var authorAvatar: String? = null,
     // Добавляем новое поле: по умолчанию false (невидимый)
-    val isVisible: Boolean = false
+    val isVisible: Boolean = false,
+    @Embedded
+    val attachment: Attachment?,
 ) {
     fun toDto() = Post(
         id = id,
@@ -31,7 +35,8 @@ data class PostEntity(
         viewCount = viewCount,
         videoUrl = videoUrl,
         authorAvatar = authorAvatar,
-        isVisible = isVisible
+        isVisible = isVisible,
+        attachment = attachment
     )
 
     companion object {
@@ -47,7 +52,9 @@ data class PostEntity(
                 viewCount = dto.viewCount,
                 videoUrl = dto.videoUrl,
                 authorAvatar = dto.authorAvatar,
-                isVisible = isVisible // Устанавливаем видимость
+                attachment = dto.attachment,
+                isVisible = isVisible, // Устанавливаем видимость
+
             )
     }
 }
