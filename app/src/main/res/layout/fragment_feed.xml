@@ -83,5 +83,13 @@
         android:contentDescription="@string/add_post"
         app:srcCompat="@drawable/ic_add_24" />
 
+    <!-- НОВЫЙ КОНТЕЙНЕР ДЛЯ ПОЛНОЭКРАННОГО ИЗОБРАЖЕНИЯ -->
+    <FrameLayout
+        android:id="@+id/fragment_container_for_fullscreen"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="10dp" /><!-- Установите elevation, чтобы он был поверх других элементов -->
+
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

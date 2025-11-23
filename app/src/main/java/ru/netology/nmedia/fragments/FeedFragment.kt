@@ -93,6 +93,18 @@ class FeedFragment : Fragment() {
                 )
             }
 
+
+            override fun onImageClick(imageUrl: String) {
+                // Создаем и показываем PhotoPostFragment
+                val photoPostFragment = PhotoPostFragment().newInstance(imageUrl)
+                // Используем childFragmentManager, так как мы во фрагменте
+                // R.id.fragment_container_for_fullscreen - это ID FrameLayout в разметке FeedFragment
+                childFragmentManager.beginTransaction()
+                    .add(R.id.fragment_container_for_fullscreen, photoPostFragment) // Используем .add, чтобы PhotoPostFragment наложился поверх
+                    .addToBackStack(null) // Это позволит вернуться к FeedFragment по кнопке "Назад"
+                    .commit()
+            }
+
             override fun onVideoPlay(post: Post) {
                 val intent = Intent(Intent.ACTION_VIEW, post.videoUrl?.toUri())
                 val playWebVideoIntent =

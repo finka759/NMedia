@@ -1,6 +1,7 @@
 package ru.netology.nmedia.viewmodel
 
 import android.app.Application
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -17,9 +18,11 @@ import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.model.FeedModelState
+import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.util.SingleLiveEvent
 import ru.netology.nmedia.repository.PostRepository
 import ru.netology.nmedia.repository.PostRepositoryNetworkImpl
+import java.io.File
 
 private val empty = Post(
     id = 0,
@@ -76,8 +79,22 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     val postCreated: LiveData<Unit>
         get() = _postCreated
 
+
+    private val _photo = MutableLiveData<PhotoModel?>()
+    val photo: LiveData<PhotoModel?>
+        get() = _photo
+
+
     init {
         loadPosts()
+    }
+
+    fun updatePhoto(uri: Uri?, file: File?) {
+        _photo.value = PhotoModel(uri, file)
+    }
+
+    fun clearPhoto() {
+        _photo.value = null
     }
 
 
@@ -166,11 +183,26 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+//    fun save() {
+//        viewModelScope.launch {
+//            edited.value?.let {
+//                try {
+//                    repository.save(it)
+//                    _postCreated.value = Unit
+//                    gDraftContent = ""
+//                } catch (e: Exception) {
+//                    gDraftContent = it.content
+//                    _state.value = FeedModelState(error = true)
+//                }
+//            }
+//            edited.value = empty
+//        }
+//
     fun save() {
         viewModelScope.launch {
             edited.value?.let {
                 try {
-                    repository.save(it)
+                    repository.saveWithAttachment(it, _photo.value?.file)
                     _postCreated.value = Unit
                     gDraftContent = ""
                 } catch (e: Exception) {

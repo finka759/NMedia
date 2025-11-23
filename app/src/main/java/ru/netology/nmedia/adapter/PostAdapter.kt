@@ -13,7 +13,7 @@ import ru.netology.nmedia.BuildConfig
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
-
+import ru.netology.nmedia.enumeration.AttachmentType
 
 
 interface OnInteractorListener {
@@ -23,6 +23,8 @@ interface OnInteractorListener {
     fun onEdit(post: Post)
     fun onVideoPlay(post: Post)
     fun toSinglePost(post: Post)
+
+    fun onImageClick(imageUrl: String)
 
 }
 
@@ -74,6 +76,35 @@ class PostViewHolder(
             onInteractorListener.onShare(post)
 
         }
+
+
+        val urlPhoto = "${BuildConfig.BASE_URL}/media/${post.attachment?.url}"
+//        val url = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
+        // --- Вот место для отображения изображения поста ---
+        if (post.attachment != null && post.attachment.type == AttachmentType.IMAGE) {
+            // Если вложение есть и это изображение:
+            postImage.visibility = View.VISIBLE
+            // Используем Glide для загрузки изображения по URL из интернета
+            Glide.with(postImage)
+                .load(urlPhoto) // URL изображения из DTO Post
+                .placeholder(R.drawable.ic_loading_100dp) // Заглушка во время загрузки
+                .error(R.drawable.ic_error_100dp) // Изображение ошибки при неудаче
+                .timeout(10_000)
+                .into(postImage)
+
+            // !!! НОВЫЙ OnClickListener для изображения вызывает onImageClick через интерфейс !!!
+            postImage.setOnClickListener {
+                onInteractorListener.onImageClick(urlPhoto)
+            }
+
+        } else {
+            // Если вложения нет или оно другого типа, скрываем ImageView
+            postImage.visibility = View.GONE
+            postImage.setOnClickListener(null)
+        }
+
+
+
         more.setOnClickListener {
             PopupMenu(it.context, it).apply {
                 inflate(R.menu.post_options)
@@ -112,7 +143,6 @@ class PostViewHolder(
         barrier.setOnClickListener {
             onInteractorListener.toSinglePost(post)
         }
-
 
 
         val url = "${BuildConfig.BASE_URL}/avatars/${post.authorAvatar}"
