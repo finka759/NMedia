@@ -31,4 +31,11 @@
             android:id="@+id/action_singlePostFragment_to_newPostFragment"
             app:destination="@id/newPostFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/signInFragment"
+        android:name="ru.netology.nmedia.fragments.SignInFragment"
+        android:label="SignInFragment" />
+
+
 </navigation>

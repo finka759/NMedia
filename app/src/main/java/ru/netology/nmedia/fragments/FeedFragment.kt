@@ -10,19 +10,21 @@ import ru.netology.nmedia.adapter.PostAdapter
 import ru.netology.nmedia.dto.Post
 
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-
+import androidx.appcompat.app.AlertDialog
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
-
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.util.StringArg
+import ru.netology.nmedia.viewmodel.AuthViewModel
 
 
 class FeedFragment : Fragment() {
@@ -31,21 +33,20 @@ class FeedFragment : Fragment() {
         var Bundle.textArgs by StringArg
     }
 
-    // Флаг для отслеживания необходимости скролла после обновления данных
-    private var shouldScrollToTop = false
+    val viewModel: PostViewModel by viewModels(ownerProducer = ::requireParentFragment)
+    private val authViewModel: AuthViewModel by activityViewModels() // Инициализация AuthViewModel
+
+    private var shouldScrollToTop =
+        false// Флаг для отслеживания необходимости скролла после обновления данных
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val binding = FragmentFeedBinding.inflate(
-            inflater,
-            container,
-            false,
-        )
+        val binding = FragmentFeedBinding.inflate(inflater, container, false)
 
-        val viewModel: PostViewModel by viewModels(ownerProducer = ::requireParentFragment)
+//        val viewModel: PostViewModel by viewModels(ownerProducer = ::requireParentFragment)
 
         binding.fab.setOnClickListener {
             findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
@@ -100,7 +101,10 @@ class FeedFragment : Fragment() {
                 // Используем childFragmentManager, так как мы во фрагменте
                 // R.id.fragment_container_for_fullscreen - это ID FrameLayout в разметке FeedFragment
                 childFragmentManager.beginTransaction()
-                    .add(R.id.fragment_container_for_fullscreen, photoPostFragment) // Используем .add, чтобы PhotoPostFragment наложился поверх
+                    .add(
+                        R.id.fragment_container_for_fullscreen,
+                        photoPostFragment
+                    ) // Используем .add, чтобы PhotoPostFragment наложился поверх
                     .addToBackStack(null) // Это позволит вернуться к FeedFragment по кнопке "Назад"
                     .commit()
             }
@@ -118,7 +122,7 @@ class FeedFragment : Fragment() {
 
         viewModel.data.observe(viewLifecycleOwner) { state ->
             val listWasEmpty = adapter.itemCount == 0
-            adapter.submitList(state.posts){
+            adapter.submitList(state.posts) {
                 // Callback submitList выполняется после того, как список отрисован
                 // Если список был пуст ИЛИ если флаг установлен, то скроллим
                 if (shouldScrollToTop || listWasEmpty) {
@@ -190,4 +194,42 @@ class FeedFragment : Fragment() {
 
         return binding.root
     }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val binding = FragmentFeedBinding.bind(view)
+
+        // *** ДОБАВИТЬ: Подписка на событие запроса аутентификации из PostViewModel ***
+        viewModel.authRequiredEvent.observe(viewLifecycleOwner) {
+            Log.d("FeedFragment", "Получено событие authRequiredEvent. Показываем диалог.")
+            showAuthDialog()
+        }
+
+        // Код с Snackbar'ами и loadStateListener, collectLatest и т.д.
+
+        binding.fab.setOnClickListener {
+            // *** ДОБАВИТЬ: Проверка аутентификации перед переходом на NewPostFragment ***  // Используем новый метод из AuthViewModel или просто проверяем isAuthorized
+            if (authViewModel.isAuthorized) {
+                findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
+            } else {
+                showAuthDialog()
+            }
+        }
+    }
+
+    // Метод для отображения диалогового окна
+    private fun showAuthDialog() {
+        // Используем AlertDialog из androidx.appcompat
+        AlertDialog.Builder(requireContext())
+            .setTitle("Sign In to NMedia")
+            .setMessage("Чтобы выполнить это действие, необходимо войти в аккаунт.")
+            .setPositiveButton("Войти") { dialog, which ->
+                // При нажатии "Войти", переходим на фрагмент аутентификации
+                findNavController().navigate(R.id.signInFragment)
+            }
+            .setNegativeButton("Отмена", null)
+            .show()
+    }
+
 }

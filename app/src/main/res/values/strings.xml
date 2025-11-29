@@ -69,4 +69,14 @@
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
     <string name="description_post_image">posts image</string>
+    <string name="logout">Exit</string>
+    <string name="sign_in">Login</string>
+    <string name="sign_up">Registration</string>
+    <string name="sign_out">Exit</string>
+    <string name="are_you_sure">Are you sure?</string>
+    <string name="logout_confirm_button">Logout</string>
+    <string name="logout_confirmation_message">Are you certanly want to exit, from your account?</string>
+    <string name="cancel">Cancel</string>
+    <string name="login">login</string>
+    <string name="password">password</string>
 </resources>
