@@ -11,9 +11,13 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModel
@@ -26,12 +30,17 @@ import java.io.File
 
 private val empty = Post(
     id = 0,
-    author = "",
-    published = "",
     content = "",
+    author = "",
+    authorId = 0,
+    authorAvatar = "",
+    likedByMe = false,
+    likes = 0,
+    published = "",
     isVisible = true // По умолчанию в DTO пусть будет true
 )
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository: PostRepository =
@@ -44,28 +53,29 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
 
     //    private val _data = MutableLiveData(FeedModel())
-    val data: LiveData<FeedModel> =
+
+    // Событие, которое оповестит FeedFragment, что пользователь должен войти в систему
+    private val _authRequiredEvent = SingleLiveEvent<Unit>()
+    val authRequiredEvent: LiveData<Unit>
+        get() = _authRequiredEvent
+
+
+
+    val data: LiveData<FeedModel> = AppAuth.getInstance().data.flatMapLatest { token ->
+        Log.d("MyTag1", "Current User ID from token: ${token?.id}")
+
         repository.data
+            .map { posts ->
+                posts.map { post ->
+                    val isOwned = post.authorId == token?.id
+                    Log.d("MyTag11", "Post ID: ${post.id}, Author ID: ${post.authorId}, OwnedByMe calculated as: $isOwned")
+                    post.copy(ownedByMe = isOwned)
+                }
+
+            }
             .combine(repository.isEmpty().asFlow(), ::FeedModel)
-            .asLiveData()
-
-
-//    val data: LiveData<FeedModel> = liveData {
-//        // Внутри liveData builder мы можем собирать (collect) Flow
-//        repository.data.collect { posts ->
-//            // И можем получить текущее значение из LiveData с помощью getValue()
-//            val isEmpty = repository.isEmpty().value ?: false
-//
-//            // Затем мы эмитим новое значение в нашу итоговую LiveData
-//            emit(FeedModel(posts, isEmpty))
-//        }
-//    }
-
-
-//    val data: LiveData<FeedModel> =
-//        repository.data.map { list: List<Post> -> FeedModel(list, list.isEmpty()) }
-//            .catch { it.printStackTrace() }
-//            .asLiveData(Dispatchers.Default)
+    }
+        .asLiveData()
 
 
     val newerCount: LiveData<Int> = data.switchMap {
@@ -87,6 +97,9 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         loadPosts()
+
+        val authToken = AppAuth.getInstance().data.value
+        Log.d("MyTag111AuthStatus", "Token available: ${authToken != null}, User ID: ${authToken?.id}")
     }
 
     fun updatePhoto(uri: Uri?, file: File?) {
@@ -132,6 +145,16 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     fun like(id: Long) {
 
         Log.d("MyTag", "PostViewModel.like called for Post ID: $id")
+
+
+        // --- ДОБАВЛЕННАЯ ПРОВЕРКА АУТЕНТИФИКАЦИИ ---
+        val isAuthorized = AppAuth.getInstance().data.value?.id != null
+        if (!isAuthorized) {
+            // Если пользователь не авторизован, генерируем событие для фрагмента
+            _authRequiredEvent.value = Unit
+            return // Прерываем выполнение метода like
+        }
+        // -------------------------------------------
 
         val currentState = data.value ?: return
         Log.d(
@@ -183,21 +206,6 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-//    fun save() {
-//        viewModelScope.launch {
-//            edited.value?.let {
-//                try {
-//                    repository.save(it)
-//                    _postCreated.value = Unit
-//                    gDraftContent = ""
-//                } catch (e: Exception) {
-//                    gDraftContent = it.content
-//                    _state.value = FeedModelState(error = true)
-//                }
-//            }
-//            edited.value = empty
-//        }
-//
     fun save() {
         viewModelScope.launch {
             edited.value?.let {

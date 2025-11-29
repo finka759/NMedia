@@ -28,4 +28,12 @@
     <string name="new_posts_available">Свежие записи ! ▲</string>
     <string name="menu_save">Сохранить</string>
     <string name="description_post_image">изображение к посту</string>
+    <string name="sign_up">Регистрация</string>
+    <string name="sign_out">Выход</string>
+    <string name="logout">Выход</string>
+    <string name="sign_in">Вход</string>
+    <string name="are_you_sure">Вы уверены?</string>
+    <string name="logout_confirm_button">Выход</string>
+    <string name="logout_confirmation_message">"Вы точно хотите выйти из аккаунта? "</string>
+    <string name="cancel">Отмена</string>
 </resources>

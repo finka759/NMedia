@@ -10,11 +10,13 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.core.net.toFile
 import androidx.core.view.MenuProvider
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.github.dhaval2404.imagepicker.ImagePicker
@@ -22,10 +24,13 @@ import ru.netology.nmedia.fragments.FeedFragment.Companion.textArgs
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentNewPostBinding
 import ru.netology.nmedia.util.AndroidUtils
+import ru.netology.nmedia.viewmodel.AuthViewModel
 import ru.netology.nmedia.viewmodel.PostViewModel
 
 
 class NewPostFragment : Fragment() {
+
+    private val authViewModel: AuthViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -62,12 +67,7 @@ class NewPostFragment : Fragment() {
             binding.edit.setText(viewModel.gDraftContent)
         }
 
-
-
-
         binding.edit.requestFocus()
-
-
 
 
         requireActivity().addMenuProvider(object : MenuProvider {
@@ -88,23 +88,17 @@ class NewPostFragment : Fragment() {
 //                        }
                         true
                     }
+                    // Перехват нажатия на "Выход" (R.id.logout) ***
+                    R.id.logout -> {
+                        showLogoutConfirmationDialog()
+                        true // Мы обработали нажатие здесь
+                    }
 
                     else -> false
                 }
 
         }, viewLifecycleOwner
         )
-
-
-//        binding.ok.setOnClickListener {
-//            if (binding.edit.text.isNotBlank()) {
-//                val content = binding.edit.text.toString()
-//                viewModel.changeContent(content)
-//                viewModel.save()
-//            }
-//            viewModel.gDraftContent = ""
-//            findNavController().navigateUp()
-//        }
 
         viewModel.photo.observe(viewLifecycleOwner){photo ->
             if (photo == null){
@@ -160,4 +154,19 @@ class NewPostFragment : Fragment() {
         return binding.root
 
     }
+
+    // Метод для отображения диалогового окна подтверждения выхода
+    private fun showLogoutConfirmationDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle(getString(R.string.are_you_sure)) // Используйте строковый ресурс
+            .setMessage(getString(R.string.logout_confirmation_message)) // Используйте строковый ресурс
+            .setPositiveButton(getString(R.string.logout_confirm_button)) { dialog, which ->
+                // Если пользователь подтвердил выход
+                authViewModel.logout() // Выходим из системы через ViewModel
+                findNavController().navigateUp() // Возвращаемся на предыдущий фрагмент (лента постов)
+            }
+            .setNegativeButton(getString(R.string.cancel), null) // null просто закрывает диалог
+            .show()
+    }
+
 }
