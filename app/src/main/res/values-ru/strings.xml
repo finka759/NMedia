@@ -36,4 +36,6 @@
     <string name="logout_confirm_button">Выход</string>
     <string name="logout_confirmation_message">"Вы точно хотите выйти из аккаунта? "</string>
     <string name="cancel">Отмена</string>
+    <string name="Login">Вход</string>
+    <string name="password">пароль</string>
 </resources>

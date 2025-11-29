@@ -77,4 +77,6 @@
     <string name="logout_confirm_button">Logout</string>
     <string name="logout_confirmation_message">Are you certanly want to exit, from your account?</string>
     <string name="cancel">Cancel</string>
+    <string name="login">login</string>
+    <string name="password">password</string>
 </resources>
