@@ -99,11 +99,20 @@ class AppActivity : AppCompatActivity() {
                         }
 
                         R.id.logout -> {
-                            Log.d("MyTag_Logout", "Кнопка 'Выход' (R.id.logout) была нажата.")
-//                            AppAuth.getInstance().removeAuth()
-                            this@AppActivity.viewModel.logout()
-                            Log.d("MyTag_AppActivity", "Обработка выхода по умолчанию в Activity.")
-                            false
+//                            Log.d("MyTag_Logout", "Кнопка 'Выход' (R.id.logout) была нажата.")
+////                            AppAuth.getInstance().removeAuth()
+//                            this@AppActivity.viewModel.logout()
+//                            Log.d("MyTag_AppActivity", "Обработка выхода по умолчанию в Activity.")
+//                            false
+                            val currentDestination = findNavController(R.id.nav_host_fragment).currentDestination
+                            if (currentDestination?.id != R.id.newPostFragment) {
+                                Log.d("MyTag_Logout", "Кнопка 'Выход' (R.id.logout) была нажата.")
+                                viewModel.logout()
+                                Log.d("MyTag_AppActivity", "Обработка выхода по умолчанию в Activity.")
+                                true
+                            } else {
+                                false // Позволяем фрагменту обработать logout
+                            }
                         }
 
                         else -> false
