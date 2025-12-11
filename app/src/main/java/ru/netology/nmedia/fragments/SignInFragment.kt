@@ -13,10 +13,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.R
+import ru.netology.nmedia.di.DependencyContainer
 import ru.netology.nmedia.viewmodel.AuthViewModel
+import ru.netology.nmedia.viewmodel.ViewModelFactory
 
 class SignInFragment : Fragment() { // Конструктор теперь пустой
-
+    private val  dependencyContainer = DependencyContainer.getInstance()
     // Реализуем onCreateView вручную
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -31,7 +33,9 @@ class SignInFragment : Fragment() { // Конструктор теперь пу�
     }
 
     // Получаем доступ к AuthViewModel, которая уже есть в AppActivity
-    private val authViewModel: AuthViewModel by activityViewModels()
+    private val authViewModel: AuthViewModel by activityViewModels(
+        factoryProducer = { ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth, dependencyContainer.apiService) }
+    )
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

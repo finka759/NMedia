@@ -25,12 +25,17 @@ import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.firebase.messaging.FirebaseMessaging
 import ru.netology.nmedia.auth.AppAuth
+import ru.netology.nmedia.di.DependencyContainer
 import ru.netology.nmedia.viewmodel.AuthViewModel
+import ru.netology.nmedia.viewmodel.ViewModelFactory
 
 
 class AppActivity : AppCompatActivity() {
+    private val dependencyContainer = DependencyContainer.getInstance()
 
-    private val viewModel by viewModels<AuthViewModel>()
+    private val viewModel by viewModels<AuthViewModel>(
+        factoryProducer = { ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth, dependencyContainer.apiService) }
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -94,7 +99,7 @@ class AppActivity : AppCompatActivity() {
 
                         R.id.signup -> {
                             // TODO: just hardcode it, implementation must be in homework
-                            AppAuth.getInstance().setAuth(5, "x-token")
+                            dependencyContainer.appAuth.setAuth(5, "x-token")
                             true
                         }
 

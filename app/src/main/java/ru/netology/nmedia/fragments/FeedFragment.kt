@@ -23,17 +23,25 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.databinding.FragmentFeedBinding
+import ru.netology.nmedia.di.DependencyContainer
 import ru.netology.nmedia.util.StringArg
 import ru.netology.nmedia.viewmodel.AuthViewModel
+import ru.netology.nmedia.viewmodel.ViewModelFactory
 
 
 class FeedFragment : Fragment() {
+    private val  dependencyContainer = DependencyContainer.getInstance()
 
     companion object {
         var Bundle.textArgs by StringArg
     }
 
-    val viewModel: PostViewModel by viewModels(ownerProducer = ::requireParentFragment)
+    val viewModel: PostViewModel by viewModels(
+        ownerProducer = ::requireParentFragment,
+        factoryProducer = {
+            ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth, dependencyContainer.apiService)
+        }
+    )
     private val authViewModel: AuthViewModel by activityViewModels() // Инициализация AuthViewModel
 
     private var shouldScrollToTop =

@@ -11,7 +11,8 @@ import kotlinx.coroutines.flow.map
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okio.IOException
-import ru.netology.nmedia.api.PostApi
+//import ru.netology.nmedia.api.PostApi
+import ru.netology.nmedia.api.PostApiService
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.dto.Media
@@ -28,7 +29,8 @@ import kotlin.collections.map
 
 
 class PostRepositoryNetworkImpl(
-    private val dao: PostDao
+    private val dao: PostDao,
+    private val apiService: PostApiService
 ) : PostRepository {
 
 
@@ -63,7 +65,8 @@ class PostRepositoryNetworkImpl(
     override suspend fun getAllAsync() {
         Log.d("MyTag", "Repository.getAllAsync(): STARTING NETWORK REQUEST")
         try {
-            val posts = PostApi.service.getAll()
+//            val posts = PostApi.service.getAll()
+            val posts = apiService.getAll()
             Log.d(
                 "MyTag",
                 "Repository.getAllAsync(): NETWORK SUCCESS. Received ${posts.size} posts."
@@ -91,7 +94,8 @@ class PostRepositoryNetworkImpl(
 
     override suspend fun save(post: Post): Post {
         try {
-            val response = PostApi.service.save(post)
+//            val response = PostApi.service.save(post)
+            val response = apiService.save(post)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -123,7 +127,8 @@ class PostRepositoryNetworkImpl(
                 })
 
 
-            val response = PostApi.service.save(postWithAttachment)
+//            val response = PostApi.service.save(postWithAttachment)
+            val response = apiService.save(postWithAttachment)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -142,7 +147,7 @@ class PostRepositoryNetworkImpl(
     }
 
     private suspend fun upload(file: File): Media =
-        PostApi.service.upload(
+        apiService.upload(
             MultipartBody.Part.createFormData(
                 "file",
                 file.name,
@@ -157,7 +162,7 @@ class PostRepositoryNetworkImpl(
         if (deletingPost != null) {
             dao.removeById(id)
             try {
-                PostApi.service.removeById(id)
+                apiService.removeById(id)
             } catch (e: Exception) {
                 dao.insert(deletingPost)
                 throw e
@@ -175,9 +180,9 @@ class PostRepositoryNetworkImpl(
         try {
             //  Отправляем запрос на сервер
             val postFromServer = if (likeByMe) {
-                PostApi.service.dislikeById(id)
+                apiService.dislikeById(id)
             } else {
-                PostApi.service.likeById(id)
+                apiService.likeById(id)
             }
             // При успешном ответе сервера, обновляем БД данными с сервера
             // (на случай расхождений, например, сервер вернул другое количество лайков)
@@ -205,7 +210,7 @@ class PostRepositoryNetworkImpl(
     override fun getNewerCount(id: Long): Flow<Int> = flow {
         while (true) {
             delay(10_000L)
-            val response = PostApi.service.getNewer(id)
+            val response = apiService.getNewer(id)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }

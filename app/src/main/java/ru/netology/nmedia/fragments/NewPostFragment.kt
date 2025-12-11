@@ -23,12 +23,15 @@ import com.github.dhaval2404.imagepicker.ImagePicker
 import ru.netology.nmedia.fragments.FeedFragment.Companion.textArgs
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentNewPostBinding
+import ru.netology.nmedia.di.DependencyContainer
 import ru.netology.nmedia.util.AndroidUtils
 import ru.netology.nmedia.viewmodel.AuthViewModel
 import ru.netology.nmedia.viewmodel.PostViewModel
+import ru.netology.nmedia.viewmodel.ViewModelFactory
 
 
 class NewPostFragment : Fragment() {
+    private val  dependencyContainer = DependencyContainer.getInstance()
 
     private val authViewModel: AuthViewModel by activityViewModels()
 
@@ -37,12 +40,18 @@ class NewPostFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
         val binding = FragmentNewPostBinding.inflate(
             inflater,
             container,
             false,
         )
-        val viewModel: PostViewModel by viewModels(ownerProducer = ::requireParentFragment)
+        val viewModel: PostViewModel by viewModels(
+            ownerProducer = ::requireParentFragment,
+            factoryProducer = {
+                ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth, dependencyContainer.apiService)
+            }
+            )
 
         val photoLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
