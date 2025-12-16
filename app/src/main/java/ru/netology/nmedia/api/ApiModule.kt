@@ -13,9 +13,6 @@ import retrofit2.create
 import ru.netology.nmedia.BuildConfig
 import ru.netology.nmedia.auth.AppAuth
 
-import ru.netology.nmedia.repository.PostRepository
-import ru.netology.nmedia.repository.PostRepositoryNetworkImpl
-
 
 @InstallIn(SingletonComponent::class)
 @Module
