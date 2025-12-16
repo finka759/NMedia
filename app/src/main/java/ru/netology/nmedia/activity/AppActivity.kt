@@ -24,25 +24,31 @@ import ru.netology.nmedia.fragments.FeedFragment.Companion.textArgs
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.firebase.messaging.FirebaseMessaging
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.auth.AppAuth
-import ru.netology.nmedia.di.DependencyContainer
 import ru.netology.nmedia.viewmodel.AuthViewModel
-import ru.netology.nmedia.viewmodel.ViewModelFactory
+import javax.inject.Inject
 
 
+@AndroidEntryPoint
 class AppActivity : AppCompatActivity() {
-    private val dependencyContainer = DependencyContainer.getInstance()
 
-    private val viewModel by viewModels<AuthViewModel>(
-        factoryProducer = { ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth, dependencyContainer.apiService) }
-    )
+    @Inject
+    lateinit var appAuth: AppAuth
+
+    @Inject
+    lateinit var firebaseMessaging: FirebaseMessaging
+
+    @Inject
+    lateinit var googleApiAvailability: GoogleApiAvailability
+
+    private val viewModel: AuthViewModel by viewModels()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-
-
 
 
         val binding = ActivityAppBinding.inflate(layoutInflater)
@@ -55,15 +61,12 @@ class AppActivity : AppCompatActivity() {
         }
 
         requestNotificationsPermission()
-
-        // === ИСПРАВЛЕНИЕ №1: Наблюдаем за LiveData, а не за статическим геттером ===
+        // Наблюдаем за LiveData, а не за статическим геттером
         // При изменении данных в AppAuth, этот обсервер срабатывает и вызывает invalidateOptionsMenu()
         viewModel.data.observe(this) { token ->
             Log.d("AppActivityLifecycle", "Токен изменился. Вызываем invalidateOptionsMenu().")
             invalidateOptionsMenu() // <-- Это вызывает повторный вызов onCreateMenu
         }
-        // ========================================================================
-
         // Подписываемся на событие навигации из AuthViewModel
         viewModel.navigateToSignInEvent.observe(this) {
             // Выполняем переход на фрагмент аутентификации
@@ -78,58 +81,50 @@ class AppActivity : AppCompatActivity() {
                     menuInflater: MenuInflater
                 ) {
                     menuInflater.inflate(R.menu.menu_main, menu)
-
-
-                  menu.let {
-                      val isAuthorized = viewModel.data.value?.id != null
-                      Log.d("MyTag1111", "viewModel.isAutorized: $isAuthorized")
+                    menu.let {
+                        val isAuthorized = viewModel.data.value?.id != null
+                        Log.d("MyTag1111", "viewModel.isAutorized: $isAuthorized")
                         it.setGroupVisible(R.id.unauthorized, !isAuthorized)
                         it.setGroupVisible(R.id.authorized, isAuthorized)
                     }
-
                 }
 
                 override fun onMenuItemSelected(menuItem: MenuItem): Boolean =
                     when (menuItem.itemId) {
                         R.id.signin -> {
                             findNavController(R.id.nav_host_fragment).navigate(R.id.signInFragment)
-//                            AppAuth.getInstance().setAuth(5, "x-token")
                             false
                         }
-
                         R.id.signup -> {
                             // TODO: just hardcode it, implementation must be in homework
-                            dependencyContainer.appAuth.setAuth(5, "x-token")
+                            appAuth.setAuth(5, "x-token")
                             true
                         }
 
                         R.id.logout -> {
-//                            Log.d("MyTag_Logout", "Кнопка 'Выход' (R.id.logout) была нажата.")
-////                            AppAuth.getInstance().removeAuth()
-//                            this@AppActivity.viewModel.logout()
-//                            Log.d("MyTag_AppActivity", "Обработка выхода по умолчанию в Activity.")
-//                            false
-                            val currentDestination = findNavController(R.id.nav_host_fragment).currentDestination
+                            Log.d("MyTag_Logout", "Кнопка 'Выход' (R.id.logout) была нажата.")
+                            appAuth.removeAuth()
+                            this@AppActivity.viewModel.logout()
+                            Log.d("MyTag_AppActivity", "Обработка выхода по умолчанию в Activity.")
+                            false
+                            val currentDestination =
+                                findNavController(R.id.nav_host_fragment).currentDestination
                             if (currentDestination?.id != R.id.newPostFragment) {
                                 Log.d("MyTag_Logout", "Кнопка 'Выход' (R.id.logout) была нажата.")
                                 viewModel.logout()
-                                Log.d("MyTag_AppActivity", "Обработка выхода по умолчанию в Activity.")
+                                Log.d(
+                                    "MyTag_AppActivity",
+                                    "Обработка выхода по умолчанию в Activity."
+                                )
                                 true
                             } else {
                                 false // Позволяем фрагменту обработать logout
                             }
                         }
-
                         else -> false
                     }
             }
-
-
         )
-
-
-
-
 
         intent?.let {
             if (it.action != Intent.ACTION_SEND) return@let
@@ -156,26 +151,22 @@ class AppActivity : AppCompatActivity() {
             )
 
         }
-
         checkGoogleApiAvailability()
-
     }
 
     private fun requestNotificationsPermission() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             return
         }
-
         val permission = Manifest.permission.POST_NOTIFICATIONS
         if (checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED) {
             return
         }
-
         requestPermissions(arrayOf(permission), 1)
     }
 
     private fun checkGoogleApiAvailability() {
-        with(GoogleApiAvailability.getInstance()) {
+        with(googleApiAvailability) {
             val code = isGooglePlayServicesAvailable(this@AppActivity)
             if (code == ConnectionResult.SUCCESS) {
                 return@with
@@ -191,7 +182,7 @@ class AppActivity : AppCompatActivity() {
             ).show()
         }
 
-        FirebaseMessaging.getInstance().token.addOnSuccessListener {
+        firebaseMessaging.token.addOnSuccessListener {
             println(it)
         }
     }

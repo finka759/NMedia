@@ -101,12 +101,3 @@ interface PostApiService {
 //}
 
 
-//object PostApi {
-//    val service: PostApiService by lazy {
-//        retrofit.create(PostApiService::class.java)
-//    }
-//
-//    val authService: AuthService by lazy { // Добавлен authService
-//        retrofit.create(AuthService::class.java)
-//    }
-//}

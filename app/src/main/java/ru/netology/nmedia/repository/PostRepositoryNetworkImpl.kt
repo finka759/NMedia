@@ -25,10 +25,11 @@ import ru.netology.nmedia.error.AppError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
 import java.io.File
+import javax.inject.Inject
 import kotlin.collections.map
 
 
-class PostRepositoryNetworkImpl(
+class PostRepositoryNetworkImpl @Inject constructor (
     private val dao: PostDao,
     private val apiService: PostApiService
 ) : PostRepository {

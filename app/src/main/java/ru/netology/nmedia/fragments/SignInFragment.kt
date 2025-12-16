@@ -11,14 +11,15 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.R
-import ru.netology.nmedia.di.DependencyContainer
 import ru.netology.nmedia.viewmodel.AuthViewModel
-import ru.netology.nmedia.viewmodel.ViewModelFactory
 
+@AndroidEntryPoint
 class SignInFragment : Fragment() { // Конструктор теперь пустой
-    private val  dependencyContainer = DependencyContainer.getInstance()
+
+
     // Реализуем onCreateView вручную
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -33,19 +34,17 @@ class SignInFragment : Fragment() { // Конструктор теперь пу�
     }
 
     // Получаем доступ к AuthViewModel, которая уже есть в AppActivity
-    private val authViewModel: AuthViewModel by activityViewModels(
-        factoryProducer = { ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth, dependencyContainer.apiService) }
-    )
+    private val authViewModel: AuthViewModel by activityViewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. Находим элементы UI по ID
+        // Находим элементы UI по ID
         val loginEditText = view.findViewById<EditText>(R.id.edit_text_login)
         val passwordEditText = view.findViewById<EditText>(R.id.edit_text_password)
         val signInButton = view.findViewById<Button>(R.id.button_sign_in)
 
-        // 2. Добавляем слушатель нажатий на кнопку
+        // Добавляем слушатель нажатий на кнопку
         signInButton.setOnClickListener {
             val login = loginEditText.text.toString()
             val pass = passwordEditText.text.toString()
@@ -55,17 +54,17 @@ class SignInFragment : Fragment() { // Конструктор теперь пу�
                 Toast.makeText(context, "Логин и пароль введены", Toast.LENGTH_SHORT).show()
                 authViewModel.signIn(login, pass)
             } else {
-                Toast.makeText(context, "Пожалуйста, введите логин и пароль", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Пожалуйста, введите логин и пароль", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
 
-
-
-        // 3. Наблюдаем за состоянием входа из ViewModel (UIState и Event)
+        //Наблюдаем за состоянием входа из ViewModel (UIState и Event)
 
         // Наблюдаем за одноразовым событием успешного входа (из предыдущего ответа)
         authViewModel.signInEvent.observe(viewLifecycleOwner) {
-            Toast.makeText(context, "Вход выполнен!", Toast.LENGTH_SHORT).show() // Сообщение об успехе
+            Toast.makeText(context, "Вход выполнен!", Toast.LENGTH_SHORT)
+                .show() // Сообщение об успехе
             // Если вход успешен, возвращаемся назад
             findNavController().popBackStack()
         }
@@ -78,19 +77,17 @@ class SignInFragment : Fragment() { // Конструктор теперь пу�
                         signInButton.isEnabled = true
                         // Показать прогресс-бар, если есть
                     }
+
                     is AuthViewModel.UiState.Error -> {
                         signInButton.isEnabled = true
                         Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
                     }
+
                     is AuthViewModel.UiState.Idle -> {
                         signInButton.isEnabled = true
                     }
                 }
             }
         }
-
-
-
-
     }
 }

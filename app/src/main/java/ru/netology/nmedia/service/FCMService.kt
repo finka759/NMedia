@@ -12,11 +12,14 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.google.gson.Gson
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 import ru.netology.nmedia.auth.AppAuth
-import ru.netology.nmedia.di.DependencyContainer
+import javax.inject.Inject
 import kotlin.random.Random
 
+
+@AndroidEntryPoint
 class FCMService : FirebaseMessagingService() {
 
     private val action = "action"
@@ -24,6 +27,9 @@ class FCMService : FirebaseMessagingService() {
     private val channelId = "remote"
     private val gson = Gson()
     private val recipientIdKey = "recipientId"
+
+    @Inject
+    lateinit var appAuth: AppAuth
 
     override fun onCreate() {
         super.onCreate()
@@ -41,7 +47,7 @@ class FCMService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         Log.i("---fsm-token---", token)
-        DependencyContainer.getInstance().appAuth.sendPushToken(token)
+        appAuth.sendPushToken(token)
 
     }
 
@@ -49,7 +55,7 @@ class FCMService : FirebaseMessagingService() {
 //        Log.i("---fsm-message-geted---", message.data.toString())
         Log.d("FCMService", "Message data received: ${message.data}")
         // Получаем текущего пользователя из AppAuth
-        val currentUserId = DependencyContainer.getInstance().appAuth.data.value?.id ?: 0L
+        val currentUserId = appAuth.data.value?.id ?: 0L
 
         // Извлекаем строку внутреннего JSON по ключу "content"
         val innerJsonString = message.data[content] ?: run {
@@ -111,7 +117,7 @@ class FCMService : FirebaseMessagingService() {
                         "FCMService",
                         "Server thinks anonymous (0), but we are logged in. Resending token."
                     )
-                    DependencyContainer.getInstance().appAuth.sendPushToken()
+                    appAuth.sendPushToken()
                 } else {
                     handleActionMessageFromMap(innerMap)
                 }
@@ -124,7 +130,7 @@ class FCMService : FirebaseMessagingService() {
                     handleActionMessageFromMap(innerMap)
                 } else {
                     Log.d("FCMService", "RecipientId mismatch. Resending token.")
-                    DependencyContainer.getInstance().appAuth.sendPushToken()
+                    appAuth.sendPushToken()
                 }
             }
         }
@@ -142,9 +148,11 @@ class FCMService : FirebaseMessagingService() {
                     Action.LIKE -> handleLike(
                         gson.fromJson(contentString, ActionLike::class.java)
                     )
+
                     Action.NEW_POST -> handleNewPost(
                         gson.fromJson(contentString, NewPost::class.java)
                     )
+
                     Action.UNIVERSAL -> handleUniversal(contentString)
                 }
             } else {

@@ -8,8 +8,11 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 
+
+@AndroidEntryPoint
 class PhotoPostFragment : Fragment() {
 
     private lateinit var fullScreenImageView: ImageView
