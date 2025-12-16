@@ -6,9 +6,7 @@ import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.OnInteractorListener
 import ru.netology.nmedia.viewmodel.PostViewModel
 import ru.netology.nmedia.adapter.PostAdapter
-
 import ru.netology.nmedia.dto.Post
-
 import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
@@ -22,18 +20,20 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.util.StringArg
 import ru.netology.nmedia.viewmodel.AuthViewModel
 
 
+@AndroidEntryPoint
 class FeedFragment : Fragment() {
 
     companion object {
         var Bundle.textArgs by StringArg
     }
 
-    val viewModel: PostViewModel by viewModels(ownerProducer = ::requireParentFragment)
+    val viewModel: PostViewModel by viewModels()
     private val authViewModel: AuthViewModel by activityViewModels() // Инициализация AuthViewModel
 
     private var shouldScrollToTop =
@@ -45,8 +45,6 @@ class FeedFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         val binding = FragmentFeedBinding.inflate(inflater, container, false)
-
-//        val viewModel: PostViewModel by viewModels(ownerProducer = ::requireParentFragment)
 
         binding.fab.setOnClickListener {
             findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)

@@ -20,6 +20,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.github.dhaval2404.imagepicker.ImagePicker
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.fragments.FeedFragment.Companion.textArgs
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentNewPostBinding
@@ -28,7 +29,9 @@ import ru.netology.nmedia.viewmodel.AuthViewModel
 import ru.netology.nmedia.viewmodel.PostViewModel
 
 
+@AndroidEntryPoint
 class NewPostFragment : Fragment() {
+
 
     private val authViewModel: AuthViewModel by activityViewModels()
 
@@ -37,12 +40,13 @@ class NewPostFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
         val binding = FragmentNewPostBinding.inflate(
             inflater,
             container,
             false,
         )
-        val viewModel: PostViewModel by viewModels(ownerProducer = ::requireParentFragment)
+        val viewModel: PostViewModel by viewModels()
 
         val photoLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
@@ -70,38 +74,37 @@ class NewPostFragment : Fragment() {
         binding.edit.requestFocus()
 
 
-        requireActivity().addMenuProvider(object : MenuProvider {
-            override fun onCreateMenu(
-                menu: Menu,
-                menuInflater: MenuInflater
-            ) {
-                menuInflater.inflate(R.menu.menu_new_post, menu)
-            }
-
-            override fun onMenuItemSelected(menuItem: MenuItem): Boolean =
-                when (menuItem.itemId) {
-                    R.id.save -> {
-//                        fragmentBinding?.let {
-                        viewModel.changeContent(binding.edit.text.toString())
-                        viewModel.save()
-                        AndroidUtils.hideKeyboard(requireView())
-//                        }
-                        true
-                    }
-                    // Перехват нажатия на "Выход" (R.id.logout) ***
-                    R.id.logout -> {
-                        showLogoutConfirmationDialog()
-                        true // Мы обработали нажатие здесь
-                    }
-
-                    else -> false
+        requireActivity().addMenuProvider(
+            object : MenuProvider {
+                override fun onCreateMenu(
+                    menu: Menu,
+                    menuInflater: MenuInflater
+                ) {
+                    menuInflater.inflate(R.menu.menu_new_post, menu)
                 }
 
-        }, viewLifecycleOwner
+                override fun onMenuItemSelected(menuItem: MenuItem): Boolean =
+                    when (menuItem.itemId) {
+                        R.id.save -> {
+                            viewModel.changeContent(binding.edit.text.toString())
+                            viewModel.save()
+                            AndroidUtils.hideKeyboard(requireView())
+                            true
+                        }
+                        // Перехват нажатия на "Выход" (R.id.logout) ***
+                        R.id.logout -> {
+                            showLogoutConfirmationDialog()
+                            true // Мы обработали нажатие здесь
+                        }
+
+                        else -> false
+                    }
+
+            }, viewLifecycleOwner
         )
 
-        viewModel.photo.observe(viewLifecycleOwner){photo ->
-            if (photo == null){
+        viewModel.photo.observe(viewLifecycleOwner) { photo ->
+            if (photo == null) {
                 binding.photoContainer.isGone = true
                 return@observe
             }
@@ -127,8 +130,6 @@ class NewPostFragment : Fragment() {
             // Здесь вызывается метод ViewModel, который очищает URI и File
             viewModel.updatePhoto(null, null)
         }
-
-
 
 
         val onBackPressedCallback = object : OnBackPressedCallback(true) {

@@ -1,15 +1,16 @@
 package ru.netology.nmedia.viewmodel
 
-import android.app.Application
 import android.net.Uri
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.catch
@@ -18,14 +19,12 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.auth.AppAuth
-import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.util.SingleLiveEvent
 import ru.netology.nmedia.repository.PostRepository
-import ru.netology.nmedia.repository.PostRepositoryNetworkImpl
 import java.io.File
 
 private val empty = Post(
@@ -40,11 +39,16 @@ private val empty = Post(
     isVisible = true // По умолчанию в DTO пусть будет true
 )
 
+@HiltViewModel
 @OptIn(ExperimentalCoroutinesApi::class)
-class PostViewModel(application: Application) : AndroidViewModel(application) {
+class PostViewModel @Inject constructor(
+private val repository: PostRepository,
+private val appAuth: AppAuth,
 
-    private val repository: PostRepository =
-        PostRepositoryNetworkImpl(AppDb.getInstance(application).postDao())
+) : ViewModel() {
+
+//    private val repository: PostRepository =
+//        PostRepositoryNetworkImpl(AppDb.getInstance(application).postDao())
     var gDraftContent: String = ""
 
     private val _state = MutableLiveData(FeedModelState())
@@ -61,7 +65,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
 
 
-    val data: LiveData<FeedModel> = AppAuth.getInstance().data.flatMapLatest { token ->
+    val data: LiveData<FeedModel> = appAuth.data.flatMapLatest { token ->
         Log.d("MyTag1", "Current User ID from token: ${token?.id}")
 
         repository.data
@@ -98,7 +102,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     init {
         loadPosts()
 
-        val authToken = AppAuth.getInstance().data.value
+        val authToken = appAuth.data.value
         Log.d("MyTag111AuthStatus", "Token available: ${authToken != null}, User ID: ${authToken?.id}")
     }
 
@@ -148,7 +152,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
 
         // --- ДОБАВЛЕННАЯ ПРОВЕРКА АУТЕНТИФИКАЦИИ ---
-        val isAuthorized = AppAuth.getInstance().data.value?.id != null
+        val isAuthorized = appAuth.data.value?.id != null
         if (!isAuthorized) {
             // Если пользователь не авторизован, генерируем событие для фрагмента
             _authRequiredEvent.value = Unit
