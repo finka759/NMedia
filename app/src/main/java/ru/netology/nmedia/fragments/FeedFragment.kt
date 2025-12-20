@@ -18,9 +18,15 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.util.StringArg
 import ru.netology.nmedia.viewmodel.AuthViewModel
@@ -118,44 +124,43 @@ class FeedFragment : Fragment() {
 
         binding.list.adapter = adapter
 
-        viewModel.data.observe(viewLifecycleOwner) { state ->
-            val listWasEmpty = adapter.itemCount == 0
-            adapter.submitList(state.posts) {
-                // Callback submitList выполняется после того, как список отрисован
-                // Если список был пуст ИЛИ если флаг установлен, то скроллим
-                if (shouldScrollToTop || listWasEmpty) {
-                    binding.list.scrollToPosition(0)
-                    shouldScrollToTop = false // Сбрасываем флаг после скролла
-                }
+        lifecycleScope.launchWhenCreated {
+            viewModel.data.collectLatest {
+                adapter.submitData(it)
             }
-            binding.emptyText.isVisible = state.empty
+        }
+        // 1. ПРАВИЛЬНЫЙ СБОР ДАННЫХ PAGING 3
+//        viewLifecycleOwner.lifecycleScope.launch { {
+//            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+//                viewModel.data.collectLatest {
+//                    adapter.submitData(it)
+//                }
+//            }
+//        }
+
+        lifecycleScope.launchWhenCreated {
+            adapter.loadStateFlow.collectLatest { state ->
+                // ПРИСВАИВАЕМ значение свойству isRefreshing
+                binding.swiperefresh.isRefreshing =
+                    state.refresh is LoadState.Loading ||
+                            state.append is LoadState.Loading ||
+                            state.prepend is LoadState.Loading
+            }
         }
 
+        // ОБРАБОТКА ОБНОВЛЕНИЯ ЧЕРЕЗ АДАПТЕР
+        binding.swiperefresh.setOnRefreshListener {
+            adapter.refresh()
+        }
+        // Обработка ошибок через стейт
         viewModel.state.observe(viewLifecycleOwner) { state ->
-            binding.progress.isVisible = state.loading
-            if (state.error && state.removeErrorPostId != null) {
-                Snackbar.make(binding.root, R.string.error_removing_post, Snackbar.LENGTH_LONG)
-                    .setAction(R.string.retry_loading) {
-                        // При нажатии "Повторить" вызываем новый метод во ViewModel
-                        viewModel.retryRemoveById(state.removeErrorPostId)
-                    }
+            if (state.error) {
+                val message = if (state.removeErrorPostId != null) R.string.error_removing_post else R.string.error_loading
+                Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG)
+                    .setAction(R.string.retry_loading) { adapter.refresh() }
                     .show()
                 viewModel.resetErrorState()
             }
-
-            if (state.error && state.removeErrorPostId == null && state.likeError) {
-                Snackbar.make(binding.root, R.string.error_liking_post, Snackbar.LENGTH_LONG)
-                    .show()
-                viewModel.resetErrorState()
-            }
-
-            if (state.error && state.removeErrorPostId == null && !state.likeError) {
-                Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
-                    .setAction(R.string.retry_loading) { viewModel.loadPosts() }
-                    .show()
-                viewModel.resetErrorState()
-            }
-            binding.swiperefresh.isRefreshing = state.refreshing
         }
 
         viewModel.newerCount.observe(viewLifecycleOwner) { state ->
@@ -185,10 +190,6 @@ class FeedFragment : Fragment() {
         }
 
 
-
-        binding.swiperefresh.setOnRefreshListener {
-            viewModel.refresh()
-        }
 
         return binding.root
     }

@@ -22,9 +22,6 @@
 //            modelClass.isAssignableFrom(AuthViewModel::class.java) -> {
 //                AuthViewModel(appAuth, apiService) as T
 //            }
-//            else -> error("Unknown class: $modelClass")
-//
+//            else -> error("Unknown class: $modelClass")//
 //        }
-//
-//
 //}

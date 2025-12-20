@@ -12,8 +12,21 @@ interface PostApiService {
     @GET("posts")
     suspend fun getAll(): List<Post>
 
+
+    //начальная загрузка, последняя страница с бекенда
+    @GET("posts/latest")
+    suspend fun getLatest(@Query("count") count: Int): Response<List<Post>>
+
     @GET("posts/{id}/newer")
     suspend fun getNewer(@Path("id") id: Long): Response<List<Post>>
+
+    //возращает страницу с постами относительно передпнного id
+    @GET("posts/{id}/before")
+    suspend fun getBefore(@Path("id") id: Long, @Query("count") count: Int): Response<List<Post>>
+
+    //возращает страницу с постами относительно передпнного id
+    @GET("posts/{id}/after")
+    suspend fun getAfter(@Path("id") id: Long, @Query("count") count: Int): Response<List<Post>>
 
     @GET("posts/{id}")
     suspend fun getById(@Path("id") id: Long): Post
