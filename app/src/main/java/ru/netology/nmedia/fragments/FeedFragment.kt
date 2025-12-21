@@ -14,19 +14,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.core.net.toUri
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.util.StringArg
 import ru.netology.nmedia.viewmodel.AuthViewModel
@@ -129,7 +125,7 @@ class FeedFragment : Fragment() {
                 adapter.submitData(it)
             }
         }
-        // 1. ПРАВИЛЬНЫЙ СБОР ДАННЫХ PAGING 3
+        // ПРАВИЛЬНЫЙ СБОР ДАННЫХ PAGING 3
 //        viewLifecycleOwner.lifecycleScope.launch { {
 //            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 //                viewModel.data.collectLatest {

@@ -3,8 +3,6 @@ package ru.netology.nmedia.repository
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import kotlinx.coroutines.CancellationException
-import okio.IOException
-import retrofit2.HttpException
 import ru.netology.nmedia.api.PostApiService
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.error.ApiError

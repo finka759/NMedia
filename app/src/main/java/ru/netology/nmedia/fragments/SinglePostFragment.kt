@@ -104,7 +104,4 @@ class SinglePostFragment  : Fragment() {
 //
         return binding.root
     }
-
-
-
 }
