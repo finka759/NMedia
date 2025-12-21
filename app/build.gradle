@@ -69,6 +69,7 @@ dependencies {
     def retrofit_version = "3.0.0"
     def retrofitgson_version = "3.0.0"
     def imagepicker_version = "2.1"
+    def paging_version = "3.3.6"
 
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
@@ -96,6 +97,7 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-gson:$retrofitgson_version"
     implementation 'com.google.android.material:material:1.12.0'
     implementation "com.github.dhaval2404:imagepicker:$imagepicker_version"
+    implementation "androidx.paging:paging-runtime-ktx:$paging_version"
     kapt "androidx.room:room-compiler:$room_ver"
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)

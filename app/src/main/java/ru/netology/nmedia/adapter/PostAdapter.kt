@@ -5,8 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.core.view.isVisible
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import getStrViewFromInt
@@ -31,7 +31,7 @@ interface OnInteractorListener {
 
 class PostAdapter(
     private val onInteractorListener: OnInteractorListener
-) : ListAdapter<Post, PostViewHolder>(PostDiffCallBack) {
+) : PagingDataAdapter<Post, PostViewHolder>(PostDiffCallBack) {
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
@@ -40,7 +40,7 @@ class PostAdapter(
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
-        val post = getItem(position)
+        val post = getItem(position) ?: return
         holder.bind(post)
     }
 

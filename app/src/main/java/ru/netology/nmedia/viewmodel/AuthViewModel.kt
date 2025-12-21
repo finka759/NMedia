@@ -12,8 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-//import ru.netology.nmedia.api.AuthService
-//import ru.netology.nmedia.api.PostApi
 import ru.netology.nmedia.api.PostApiService
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.util.SingleLiveEvent
@@ -48,8 +46,6 @@ class AuthViewModel @Inject constructor(
         object Loading : UiState()
         data class Error(val message: String) : UiState()
     }
-
-
     fun signIn(login: String, pass: String) {
         _uiState.value = UiState.Loading // Начинаем загрузку
         viewModelScope.launch {
@@ -75,13 +71,10 @@ class AuthViewModel @Inject constructor(
             }
         }
     }
-
     // метод logout для полноты
     fun logout() {
         appAuth.removeAuth()
     }
-
-
     // Событие для навигации на экран аутентификации из любого места (например, из PostViewModel)
     private val _navigateToSignInEvent = SingleLiveEvent<Unit>()
     val navigateToSignInEvent: SingleLiveEvent<Unit>
@@ -90,6 +83,4 @@ class AuthViewModel @Inject constructor(
     fun navigateToSignIn() {
         _navigateToSignInEvent.value = Unit
     }
-
-
 }

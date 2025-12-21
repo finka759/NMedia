@@ -1,17 +1,17 @@
 package ru.netology.nmedia.repository
 
 import android.util.Log
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okio.IOException
-//import ru.netology.nmedia.api.PostApi
 import ru.netology.nmedia.api.PostApiService
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dto.Attachment
@@ -26,35 +26,24 @@ import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
 import java.io.File
 import javax.inject.Inject
-import kotlin.collections.map
 
 
-class PostRepositoryNetworkImpl @Inject constructor (
+class PostRepositoryNetworkImpl @Inject constructor(
     private val dao: PostDao,
     private val apiService: PostApiService
 ) : PostRepository {
 
-
-//    // 1. Получение исходного Flow от DAO
-//    val rawFlow: Flow<List<Entity>> = dao.getAll()
-//
-//    // 2. Операция map внешнего Flow (преобразование списка)
-//// Мы определяем функцию-преобразователь, которую передаем в map:
-//    val transformList: (List<Entity>) -> List<Dto> = { entityList ->
-//        // Здесь мы применяем внутренний map к самому списку
-//        entityList.map { entity ->
-//            entity.toDto()
-//        }
-//    }
-//
-//    // 3. Применение функции преобразования к Flow
-//    val listFlow: Flow<List<Dto>> = rawFlow.map { transformList(it) }
-//
-//    // 4. Применение контекста выполнения
-//    override val data = listFlow.flowOn(Dispatchers.Default)
+    override val data = Pager(
+        config = PagingConfig(pageSize = 10, enablePlaceholders = false),
+        pagingSourceFactory = {
+            PostPagingSource(
+                apiService
+            )
+        },
+    ).flow
 
 
-    override val data = dao.getAllVisible().map { it.map { it.toDto() } }
+//    override val data = dao.getAllVisible().map { it.map { it.toDto() } }
 
     override fun isEmpty() = dao.isEmpty()
 
@@ -157,7 +146,6 @@ class PostRepositoryNetworkImpl @Inject constructor (
         )
 
 
-
     override suspend fun removeById(id: Long) {
         val deletingPost = dao.getPostById(id)
         if (deletingPost != null) {
@@ -173,14 +161,16 @@ class PostRepositoryNetworkImpl @Inject constructor (
 
     override suspend fun like(
         id: Long,
-        likeByMe: Boolean
+
     ): Post {
+        val postInDb = dao.getPostById(id) ?: throw RuntimeException("Post not found in DB")
+        val wasLiked = postInDb.likeByMe
         // Переключаем состояние
         dao.likeById(id)
 
         try {
             //  Отправляем запрос на сервер
-            val postFromServer = if (likeByMe) {
+            val postFromServer = if (wasLiked) {
                 apiService.dislikeById(id)
             } else {
                 apiService.likeById(id)

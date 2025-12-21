@@ -5,22 +5,19 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asFlow
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
-import jakarta.inject.Inject
-import kotlinx.coroutines.Dispatchers
+import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.util.SingleLiveEvent
@@ -42,13 +39,10 @@ private val empty = Post(
 @HiltViewModel
 @OptIn(ExperimentalCoroutinesApi::class)
 class PostViewModel @Inject constructor(
-private val repository: PostRepository,
-private val appAuth: AppAuth,
+    private val repository: PostRepository,
+    private val appAuth: AppAuth,
 
-) : ViewModel() {
-
-//    private val repository: PostRepository =
-//        PostRepositoryNetworkImpl(AppDb.getInstance(application).postDao())
+    ) : ViewModel() {
     var gDraftContent: String = ""
 
     private val _state = MutableLiveData(FeedModelState())
@@ -64,29 +58,42 @@ private val appAuth: AppAuth,
         get() = _authRequiredEvent
 
 
+//    val data: LiveData<FeedModel> = appAuth.data.flatMapLatest { token ->
+//        Log.d("MyTag1", "Current User ID from token: ${token?.id}")
+//        repository.data
+//            .map { posts ->
+//                posts.map { post ->
+//                    val isOwned = post.authorId == token?.id
+//                    Log.d("MyTag11", "Post ID: ${post.id}, Author ID: ${post.authorId}, OwnedByMe calculated as: $isOwned")
+//                    post.copy(ownedByMe = isOwned)
+//                }
+//
+//            }
+//            .combine(repository.isEmpty().asFlow(), ::FeedModel)
+//    }
+//        .asLiveData()
 
-    val data: LiveData<FeedModel> = appAuth.data.flatMapLatest { token ->
-        Log.d("MyTag1", "Current User ID from token: ${token?.id}")
 
-        repository.data
-            .map { posts ->
-                posts.map { post ->
-                    val isOwned = post.authorId == token?.id
-                    Log.d("MyTag11", "Post ID: ${post.id}, Author ID: ${post.authorId}, OwnedByMe calculated as: $isOwned")
-                    post.copy(ownedByMe = isOwned)
+    val data: Flow<PagingData<Post>> = appAuth.data
+        .flatMapLatest { token ->
+            val myId = token?.id
+            repository.data.map { pagingData ->
+                // Используем метод map самого PagingData
+                pagingData.map { post ->
+                    post.copy(ownedByMe = post.authorId == myId)
                 }
-
             }
-            .combine(repository.isEmpty().asFlow(), ::FeedModel)
-    }
-        .asLiveData()
+        }
+        // Обязательно кэшируем в viewModelScope!
+        .cachedIn(viewModelScope)
 
 
-    val newerCount: LiveData<Int> = data.switchMap {
-        repository.getNewerCount(it.posts.firstOrNull()?.id ?: 0L)
-            .catch { e -> e.printStackTrace() }
-            .asLiveData(Dispatchers.Default)
-    }
+    //    val newerCount: LiveData<Int> = appAuth.data.flatMapLatest { _ ->
+//        repository.getNewerCount(0L)
+//    }
+//        .catch { e -> e.printStackTrace() }
+//        .asLiveData(Dispatchers.Default)
+    val newerCount: LiveData<Int> = MutableLiveData(0)
 
     private val edited = MutableLiveData(empty)
     private val _postCreated = SingleLiveEvent<Unit>()
@@ -100,10 +107,13 @@ private val appAuth: AppAuth,
 
 
     init {
-        loadPosts()
+//        loadPosts()
 
         val authToken = appAuth.data.value
-        Log.d("MyTag111AuthStatus", "Token available: ${authToken != null}, User ID: ${authToken?.id}")
+        Log.d(
+            "MyTag111AuthStatus",
+            "Token available: ${authToken != null}, User ID: ${authToken?.id}"
+        )
     }
 
     fun updatePhoto(uri: Uri?, file: File?) {
@@ -130,20 +140,20 @@ private val appAuth: AppAuth,
     }
 
 
-    fun loadPosts() {
-        Log.d("MyTag", "PostViewModel.loadPosts() called")
-        viewModelScope.launch {
-            _state.value = FeedModelState(loading = true)
-            try {
-                repository.getAllAsync()
-                repository.showAllInvisible()
-                _state.value = FeedModelState()
-            } catch (e: Exception) {
-                e.printStackTrace()
-                _state.value = FeedModelState(error = true)
-            }
-        }
-    }
+//    fun loadPosts() {
+//        Log.d("MyTag", "PostViewModel.loadPosts() called")
+//        viewModelScope.launch {
+//            _state.value = FeedModelState(loading = true)
+//            try {
+////                repository.getAllAsync()
+//                repository.showAllInvisible()
+//                _state.value = FeedModelState()
+//            } catch (e: Exception) {
+//                e.printStackTrace()
+//                _state.value = FeedModelState(error = true)
+//            }
+//        }
+//    }
 
 
     fun like(id: Long) {
@@ -160,21 +170,21 @@ private val appAuth: AppAuth,
         }
         // -------------------------------------------
 
-        val currentState = data.value ?: return
-        Log.d(
-            "MyTag",
-            "ViewModel: currentState is not null. Posts count: ${currentState.posts.size}"
-        )
-
-        val posts = currentState.posts
-        val post = posts.find { it.id == id } ?: return
-        val likedByMe = post.likedByMe
+//        val currentState = data.value ?: return
+//        Log.d(
+//            "MyTag",
+//            "ViewModel: currentState is not null. Posts count: ${currentState.posts.size}"
+//        )
+//
+//        val posts = currentState.posts
+//        val post = posts.find { it.id == id } ?: return
+//        val likedByMe = post.likedByMe
 
 
         viewModelScope.launch {
             try {
 
-                repository.like(id, likedByMe)
+                repository.like(id)
 
             } catch (e: Exception) {
                 _state.value = FeedModelState(error = true, likeError = true)
@@ -243,14 +253,13 @@ private val appAuth: AppAuth,
         viewModelScope.launch {
             _state.value = FeedModelState(refreshing = true)
             try {
-                repository.getAllAsync()
-                repository.showAllInvisible()
+//                repository.getAllAsync()
+//                repository.showAllInvisible()
                 _state.value = FeedModelState()
             } catch (e: Exception) {
                 e.printStackTrace()
                 _state.value = FeedModelState(error = true)
             }
-
         }
     }
 
