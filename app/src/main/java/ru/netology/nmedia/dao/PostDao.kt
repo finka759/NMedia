@@ -1,6 +1,7 @@
 package ru.netology.nmedia.dao
 
 import androidx.lifecycle.LiveData
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -13,6 +14,9 @@ interface PostDao {
 
     @Query("SELECT * FROM Post_Entity ORDER BY id DESC")
     fun getAll(): Flow<List<PostEntity>>
+
+    @Query("SELECT * FROM Post_Entity ORDER BY id DESC")
+    fun getPagingSource(): PagingSource<Int, PostEntity>
 
     // запрос, чтобы выбирать только видимые посты, отсортированные по ID убыванию
     @Query("SELECT * FROM Post_Entity WHERE isVisible = 1 ORDER BY id DESC")
@@ -54,5 +58,8 @@ interface PostDao {
     fun isEmpty(): LiveData<Boolean>
     @Query("SELECT * FROM Post_Entity WHERE id = :id")
     suspend fun getPostById(id: Long): PostEntity?
+
+    @Query("DELETE FROM Post_Entity")
+    suspend fun clear()
 
 }

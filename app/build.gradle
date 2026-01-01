@@ -1,15 +1,16 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id 'org.jetbrains.kotlin.kapt'
+//    id 'org.jetbrains.kotlin.kapt'
     id 'com.google.gms.google-services'
     alias(libs.plugins.dagger.hilt.android)
+    id 'com.google.devtools.ksp'
 }
 
 
 
 android {
-    namespace "ru.netology.nmedia"
+    namespace = "ru.netology.nmedia"
     compileSdk = 36
 
     defaultConfig {
@@ -40,8 +41,8 @@ android {
     }
 
     buildFeatures {
-        viewBinding true
-        buildConfig true
+        viewBinding = true
+        buildConfig = true
     }
 
     buildTypes {
@@ -98,7 +99,8 @@ dependencies {
     implementation 'com.google.android.material:material:1.12.0'
     implementation "com.github.dhaval2404:imagepicker:$imagepicker_version"
     implementation "androidx.paging:paging-runtime-ktx:$paging_version"
-    kapt "androidx.room:room-compiler:$room_ver"
+    ksp "androidx.room:room-compiler:$room_ver"
+    implementation "androidx.room:room-paging:$room_ver"
     implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
+    ksp(libs.hilt.compiler)
 }

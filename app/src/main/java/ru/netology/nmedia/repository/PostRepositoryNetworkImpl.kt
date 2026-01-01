@@ -1,19 +1,26 @@
 package ru.netology.nmedia.repository
 
 import android.util.Log
+import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.map
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okio.IOException
+import ru.netology.nmedia.BuildConfig
 import ru.netology.nmedia.api.PostApiService
 import ru.netology.nmedia.dao.PostDao
+import ru.netology.nmedia.dao.PostRemoteKeyDao
+import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
@@ -26,21 +33,33 @@ import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
 import java.io.File
 import javax.inject.Inject
+import javax.inject.Singleton
 
-
+@Singleton
 class PostRepositoryNetworkImpl @Inject constructor(
     private val dao: PostDao,
-    private val apiService: PostApiService
+    private val apiService: PostApiService,
+    postRemoteKeyDao: PostRemoteKeyDao,
+    appDb: AppDb
 ) : PostRepository {
 
-    override val data = Pager(
+    @OptIn(ExperimentalPagingApi::class)
+    override val data: Flow<PagingData<Post>> = Pager(
         config = PagingConfig(pageSize = 10, enablePlaceholders = false),
-        pagingSourceFactory = {
-            PostPagingSource(
-                apiService
-            )
-        },
+        pagingSourceFactory = { dao.getPagingSource() },
+        remoteMediator = PostRemoteMediator(
+            apiService = apiService,
+            postDao = dao,
+            postRemoteKeyDao = postRemoteKeyDao,
+            appDb = appDb
+        ),
     ).flow
+        .map {
+//            it.map {
+//                it.toDto()
+//            }
+            it.map(PostEntity::toDto)
+        }
 
 
 //    override val data = dao.getAllVisible().map { it.map { it.toDto() } }
@@ -53,32 +72,50 @@ class PostRepositoryNetworkImpl @Inject constructor(
     }
 
     override suspend fun getAllAsync() {
-        Log.d("MyTag", "Repository.getAllAsync(): STARTING NETWORK REQUEST")
+        if (BuildConfig.DEBUG) {
+            Log.d("MyTag", "Repository.getAllAsync(): STARTING NETWORK REQUEST")
+        }
         try {
 //            val posts = PostApi.service.getAll()
             val posts = apiService.getAll()
-            Log.d(
-                "MyTag",
-                "Repository.getAllAsync(): NETWORK SUCCESS. Received ${posts.size} posts."
-            )
+            if (BuildConfig.DEBUG) {
+                Log.d(
+                    "MyTag",
+                    "Repository.getAllAsync(): NETWORK SUCCESS. Received ${posts.size} posts."
+                )
+            }
             if (posts.isNotEmpty()) { // проверка, чтобы не вызывать insert для пустого списка
                 // вставляем новые посты как НЕВИДИМЫЕ (false)
                 dao.insert(posts.toEntity(isVisible = false))
-                Log.d("MyTag", "Repository.getAllAsync(): INSERTED ${posts.size} posts into DB.")
+                if (BuildConfig.DEBUG) {
+                    Log.d(
+                        "MyTag",
+                        "Repository.getAllAsync(): INSERTED ${posts.size} posts into DB."
+                    )
+                }
             } else {
-                Log.d("MyTag", "Repository.getAllAsync(): API returned 0 posts. Nothing to insert.")
+                if (BuildConfig.DEBUG) {
+                    Log.d(
+                        "MyTag",
+                        "Repository.getAllAsync(): API returned 0 posts. Nothing to insert."
+                    )
+                }
             }
         } catch (e: Exception) {
             // обработка любых исключений
-            Log.e(
-                "MyTag",
-                "Repository.getAllAsync(): AN EXCEPTION OCCURRED during network request or DB operation!",
-                e
-            )
+            if (BuildConfig.DEBUG) {
+                Log.e(
+                    "MyTag",
+                    "Repository.getAllAsync(): AN EXCEPTION OCCURRED during network request or DB operation!",
+                    e
+                )
+            }
             // Важно: перебросить исключение, чтобы ViewModel мог его обработать
             throw e
         }
-        Log.d("MyTag", "Repository.getAllAsync(): FINISHED.")
+        if (BuildConfig.DEBUG) {
+            Log.d("MyTag", "Repository.getAllAsync(): FINISHED.")
+        }
     }
 
 
@@ -162,7 +199,7 @@ class PostRepositoryNetworkImpl @Inject constructor(
     override suspend fun like(
         id: Long,
 
-    ): Post {
+        ): Post {
         val postInDb = dao.getPostById(id) ?: throw RuntimeException("Post not found in DB")
         val wasLiked = postInDb.likeByMe
         // Переключаем состояние
