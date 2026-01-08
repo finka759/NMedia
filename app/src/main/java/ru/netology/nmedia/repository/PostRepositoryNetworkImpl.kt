@@ -5,6 +5,7 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.insertSeparators
 import androidx.paging.map
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -21,7 +22,9 @@ import ru.netology.nmedia.api.PostApiService
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dao.PostRemoteKeyDao
 import ru.netology.nmedia.db.AppDb
+import ru.netology.nmedia.dto.Ad
 import ru.netology.nmedia.dto.Attachment
+import ru.netology.nmedia.dto.FeedItem
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.entity.PostEntity
@@ -34,6 +37,7 @@ import ru.netology.nmedia.error.UnknownError
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.random.Random
 
 @Singleton
 class PostRepositoryNetworkImpl @Inject constructor(
@@ -44,7 +48,7 @@ class PostRepositoryNetworkImpl @Inject constructor(
 ) : PostRepository {
 
     @OptIn(ExperimentalPagingApi::class)
-    override val data: Flow<PagingData<Post>> = Pager(
+    override val data: Flow<PagingData<FeedItem>> = Pager(
         config = PagingConfig(pageSize = 10, enablePlaceholders = false),
         pagingSourceFactory = { dao.getPagingSource() },
         remoteMediator = PostRemoteMediator(
@@ -59,6 +63,13 @@ class PostRepositoryNetworkImpl @Inject constructor(
 //                it.toDto()
 //            }
             it.map(PostEntity::toDto)
+                .insertSeparators { previous, _ ->
+                    if (previous?.id?.rem(5) == 0L) {
+                        Ad(Random.nextLong(), "figma.jpg")
+                    } else {
+                        null
+                    }
+                }
         }
 
 
@@ -76,7 +87,6 @@ class PostRepositoryNetworkImpl @Inject constructor(
             Log.d("MyTag", "Repository.getAllAsync(): STARTING NETWORK REQUEST")
         }
         try {
-//            val posts = PostApi.service.getAll()
             val posts = apiService.getAll()
             if (BuildConfig.DEBUG) {
                 Log.d(
@@ -121,7 +131,6 @@ class PostRepositoryNetworkImpl @Inject constructor(
 
     override suspend fun save(post: Post): Post {
         try {
-//            val response = PostApi.service.save(post)
             val response = apiService.save(post)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
@@ -154,7 +163,6 @@ class PostRepositoryNetworkImpl @Inject constructor(
                 })
 
 
-//            val response = PostApi.service.save(postWithAttachment)
             val response = apiService.save(postWithAttachment)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
@@ -214,7 +222,6 @@ class PostRepositoryNetworkImpl @Inject constructor(
             }
             // При успешном ответе сервера, обновляем БД данными с сервера
             // (на случай расхождений, например, сервер вернул другое количество лайков)
-//            dao.insert(PostEntity.fromDto(postFromServer))
             dao.insert(PostEntity.fromDto(postFromServer, isVisible = true))
             // Возвращаем объект Post из сервера
             return postFromServer

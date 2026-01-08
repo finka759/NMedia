@@ -1,5 +1,6 @@
 package ru.netology.nmedia.repository
 
+import android.util.Log
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
@@ -30,7 +31,6 @@ class PostRemoteMediator(
         try {
             val result = when (loadType) {
                 LoadType.REFRESH ->
-//                    apiService.getLatest(state.config.initialLoadSize)
                 {
                     // Ищем ID самого нового поста
                     val maxId = postRemoteKeyDao.max()
@@ -45,11 +45,12 @@ class PostRemoteMediator(
 
 
                 LoadType.PREPEND -> {
-//                    val id = postRemoteKeyDao.max() ?: return MediatorResult.Success(
-//                        endOfPaginationReached = false
-//                    )
-//                    apiService.getAfter(id, state.config.pageSize)
-                    return MediatorResult.Success(endOfPaginationReached = true)
+                    // Находим ID самого свежего поста в нашей БД
+                    val id = postRemoteKeyDao.max() ?: return MediatorResult.Success(
+                        endOfPaginationReached = false
+                    )
+                    // Запрашиваем у сервера посты, которые новее этого ID
+                    apiService.getAfter(id, state.config.pageSize)
                 }
 
                 LoadType.APPEND -> {
@@ -61,7 +62,7 @@ class PostRemoteMediator(
             }
             if (!result.isSuccessful) {
                 // ЛОГ ОШИБКИ СЕРВЕРА
-                android.util.Log.e("PagingLog", "Error: ${result.code()} ${result.message()}")
+                Log.e("PagingLog", "Error: ${result.code()} ${result.message()}")
                 throw ApiError(result.code(), result.message())
             }
             val data = result.body() ?: throw ApiError(
@@ -73,20 +74,6 @@ class PostRemoteMediator(
 
                 when (loadType) {
                     LoadType.REFRESH -> {
-//                        postDao.clear()
-
-//                        postRemoteKeyDao.insert(
-//                            listOf(
-//                                PostRemoteKeyEntity(
-//                                    PostRemoteKeyEntity.KeyType.AFTER,
-//                                    data.first().id
-//                                ),
-//                                PostRemoteKeyEntity(
-//                                    PostRemoteKeyEntity.KeyType.BEFORE,
-//                                    data.last().id
-//                                ),
-//                            )
-//                        )
                         if (data.isNotEmpty()) {
                             // Обновляем ключ AFTER только если пришли новые данные
                             postRemoteKeyDao.insert(
@@ -107,15 +94,6 @@ class PostRemoteMediator(
                         }
                     }
 
-//                    LoadType.PREPEND -> {
-//                        postRemoteKeyDao.insert(
-//                            PostRemoteKeyEntity(
-//                                PostRemoteKeyEntity.KeyType.AFTER,
-//                                data.first().id
-//                            )
-//                        )
-//                    }
-
                     LoadType.APPEND -> {
                         if (data.isNotEmpty()) {//добавил проверку на пустоту в бд
                             postRemoteKeyDao.insert(
@@ -133,29 +111,21 @@ class PostRemoteMediator(
 
                 if (BuildConfig.DEBUG) {
                     // --- ВОТ ЗДЕСЬ СТАВИМ ЛОГИ ДЛЯ ПРОВЕРКИ ДАННЫХ ---
-                    android.util.Log.d("PagingLog", "Received data size: ${data.size}")
+                    Log.d("PagingLog", "Received data size: ${data.size}")
                     if (data.isNotEmpty()) {
                         data.forEach { post ->
-                            android.util.Log.d(
+                            Log.d(
                                 "PagingLog",
                                 "Post ID: ${post.id}, Content: ${post.content.take(30)}..."
                             )
                         }
                     } else {
-                        android.util.Log.d("PagingLog", "The list from server is EMPTY")
+                        Log.d("PagingLog", "The list from server is EMPTY")
                     }
                     // ------------------------------------------------
                 }
-
-                // Если данных нет, nextKey должен быть null, чтобы пагинация остановилась
-//            val nextKey = data.lastOrNull()?.id
-//                val nextKey = if (data.isEmpty()) null else data.last().id
-
-//          postDao.insert(data.map{ PostEntity.fromDto(it)})
                 postDao.insert(data.map(PostEntity::fromDto))
-
             }
-
 
             return MediatorResult.Success(
                 data.isEmpty()
@@ -169,6 +139,5 @@ class PostRemoteMediator(
             return MediatorResult.Error(e)
         }
     }
-
 
 }

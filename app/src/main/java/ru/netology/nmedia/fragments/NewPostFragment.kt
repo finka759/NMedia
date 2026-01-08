@@ -63,8 +63,6 @@ class NewPostFragment : Fragment() {
             viewModel.updatePhoto(uri, uri.toFile())
         }
 
-
-
         arguments?.textArgs?.let(binding.edit::setText)
         val startContent = binding.edit.text.toString()
         if (startContent == "" && viewModel.gDraftContent != "") {
@@ -72,7 +70,6 @@ class NewPostFragment : Fragment() {
         }
 
         binding.edit.requestFocus()
-
 
         requireActivity().addMenuProvider(
             object : MenuProvider {
@@ -130,7 +127,6 @@ class NewPostFragment : Fragment() {
             // Здесь вызывается метод ViewModel, который очищает URI и File
             viewModel.updatePhoto(null, null)
         }
-
 
         val onBackPressedCallback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
