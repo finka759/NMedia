@@ -38,7 +38,6 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.random.Random
-import kotlin.random.nextLong
 
 @Singleton
 class PostRepositoryNetworkImpl @Inject constructor(
