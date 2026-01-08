@@ -23,6 +23,7 @@ import androidx.paging.LoadState
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
+import ru.netology.nmedia.adapter.PostLoadingStateAdapter
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.util.StringArg
 import ru.netology.nmedia.viewmodel.AuthViewModel
@@ -118,29 +119,23 @@ class FeedFragment : Fragment() {
         }
         )
 
-        binding.list.adapter = adapter
+        binding.list.adapter = adapter.withLoadStateHeaderAndFooter(
+            header = PostLoadingStateAdapter { adapter.retry() },
+            footer = PostLoadingStateAdapter { adapter.retry() }
+        )
 
         lifecycleScope.launchWhenCreated {
             viewModel.data.collectLatest {
                 adapter.submitData(it)
             }
         }
-        // ПРАВИЛЬНЫЙ СБОР ДАННЫХ PAGING 3
-//        viewLifecycleOwner.lifecycleScope.launch { {
-//            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-//                viewModel.data.collectLatest {
-//                    adapter.submitData(it)
-//                }
-//            }
-//        }
 
         lifecycleScope.launchWhenCreated {
             adapter.loadStateFlow.collectLatest { state ->
                 // ПРИСВАИВАЕМ значение свойству isRefreshing
                 binding.swiperefresh.isRefreshing =
-                    state.refresh is LoadState.Loading ||
-                            state.append is LoadState.Loading ||
-                            state.prepend is LoadState.Loading
+                    state.refresh is LoadState.Loading
+//                  || state.append is LoadState.Loading ||  state.prepend is LoadState.Loading
             }
         }
 
@@ -151,7 +146,8 @@ class FeedFragment : Fragment() {
         // Обработка ошибок через стейт
         viewModel.state.observe(viewLifecycleOwner) { state ->
             if (state.error) {
-                val message = if (state.removeErrorPostId != null) R.string.error_removing_post else R.string.error_loading
+                val message =
+                    if (state.removeErrorPostId != null) R.string.error_removing_post else R.string.error_loading
                 Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG)
                     .setAction(R.string.retry_loading) { adapter.refresh() }
                     .show()
@@ -185,8 +181,6 @@ class FeedFragment : Fragment() {
             viewModel.showNewPosts()
         }
 
-
-
         return binding.root
     }
 
@@ -217,14 +211,13 @@ class FeedFragment : Fragment() {
     private fun showAuthDialog() {
         // Используем AlertDialog из androidx.appcompat
         AlertDialog.Builder(requireContext())
-            .setTitle("Sign In to NMedia")
-            .setMessage("Чтобы выполнить это действие, необходимо войти в аккаунт.")
-            .setPositiveButton("Войти") { dialog, which ->
+            .setTitle(R.string.sign_in_title)
+            .setMessage(R.string.auth_required_message)
+            .setPositiveButton(R.string.button_sign_in) { dialog, which ->
                 // При нажатии "Войти", переходим на фрагмент аутентификации
                 findNavController().navigate(R.id.signInFragment)
             }
-            .setNegativeButton("Отмена", null)
+            .setNegativeButton(R.string.button_cancel, null)
             .show()
     }
-
 }

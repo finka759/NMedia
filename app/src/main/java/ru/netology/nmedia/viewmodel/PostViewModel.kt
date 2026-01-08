@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.auth.AppAuth
+import ru.netology.nmedia.dto.FeedItem
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.model.PhotoModel
@@ -49,50 +50,29 @@ class PostViewModel @Inject constructor(
     val state: LiveData<FeedModelState>
         get() = _state
 
-
-    //    private val _data = MutableLiveData(FeedModel())
-
     // Событие, которое оповестит FeedFragment, что пользователь должен войти в систему
     private val _authRequiredEvent = SingleLiveEvent<Unit>()
     val authRequiredEvent: LiveData<Unit>
         get() = _authRequiredEvent
 
 
-//    val data: LiveData<FeedModel> = appAuth.data.flatMapLatest { token ->
-//        Log.d("MyTag1", "Current User ID from token: ${token?.id}")
-//        repository.data
-//            .map { posts ->
-//                posts.map { post ->
-//                    val isOwned = post.authorId == token?.id
-//                    Log.d("MyTag11", "Post ID: ${post.id}, Author ID: ${post.authorId}, OwnedByMe calculated as: $isOwned")
-//                    post.copy(ownedByMe = isOwned)
-//                }
-//
-//            }
-//            .combine(repository.isEmpty().asFlow(), ::FeedModel)
-//    }
-//        .asLiveData()
-
-
-    val data: Flow<PagingData<Post>> = appAuth.data
+    val data: Flow<PagingData<FeedItem>> = appAuth.data
         .flatMapLatest { token ->
             val myId = token?.id
             repository.data.map { pagingData ->
                 // Используем метод map самого PagingData
                 pagingData.map { post ->
-                    post.copy(ownedByMe = post.authorId == myId)
+                    if (post is Post) {
+                        post.copy(ownedByMe = post.authorId == myId)
+                    }else{
+                        post
+                    }
                 }
             }
         }
         // Обязательно кэшируем в viewModelScope!
         .cachedIn(viewModelScope)
 
-
-    //    val newerCount: LiveData<Int> = appAuth.data.flatMapLatest { _ ->
-//        repository.getNewerCount(0L)
-//    }
-//        .catch { e -> e.printStackTrace() }
-//        .asLiveData(Dispatchers.Default)
     val newerCount: LiveData<Int> = MutableLiveData(0)
 
     private val edited = MutableLiveData(empty)
@@ -107,8 +87,6 @@ class PostViewModel @Inject constructor(
 
 
     init {
-//        loadPosts()
-
         val authToken = appAuth.data.value
         Log.d(
             "MyTag111AuthStatus",
@@ -139,23 +117,6 @@ class PostViewModel @Inject constructor(
         }
     }
 
-
-//    fun loadPosts() {
-//        Log.d("MyTag", "PostViewModel.loadPosts() called")
-//        viewModelScope.launch {
-//            _state.value = FeedModelState(loading = true)
-//            try {
-////                repository.getAllAsync()
-//                repository.showAllInvisible()
-//                _state.value = FeedModelState()
-//            } catch (e: Exception) {
-//                e.printStackTrace()
-//                _state.value = FeedModelState(error = true)
-//            }
-//        }
-//    }
-
-
     fun like(id: Long) {
 
         Log.d("MyTag", "PostViewModel.like called for Post ID: $id")
@@ -170,17 +131,6 @@ class PostViewModel @Inject constructor(
         }
         // -------------------------------------------
 
-//        val currentState = data.value ?: return
-//        Log.d(
-//            "MyTag",
-//            "ViewModel: currentState is not null. Posts count: ${currentState.posts.size}"
-//        )
-//
-//        val posts = currentState.posts
-//        val post = posts.find { it.id == id } ?: return
-//        val likedByMe = post.likedByMe
-
-
         viewModelScope.launch {
             try {
 
@@ -191,7 +141,6 @@ class PostViewModel @Inject constructor(
             }
         }
     }
-
 
     fun removeById(id: Long) {
         viewModelScope.launch {
@@ -253,8 +202,6 @@ class PostViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = FeedModelState(refreshing = true)
             try {
-//                repository.getAllAsync()
-//                repository.showAllInvisible()
                 _state.value = FeedModelState()
             } catch (e: Exception) {
                 e.printStackTrace()

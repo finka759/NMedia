@@ -76,7 +76,6 @@ class AppAuth @Inject constructor(
     fun sendPushToken(token: String? = null) {
         CoroutineScope(Dispatchers.Default).launch {
             try {
-//                val pushToken = PushToken(token ?: Firebase.messaging.token.await())
                 val entryPoint =
                     EntryPointAccessors.fromApplication(context, AppAuthEntryPoint::class.java)
                 entryPoint.getApiService().sendPushToken(

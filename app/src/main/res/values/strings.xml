@@ -79,4 +79,8 @@
     <string name="cancel">Cancel</string>
     <string name="login">login</string>
     <string name="password">password</string>
+    <string name="sign_in_title">Sign in to Nmedia</string>
+    <string name="auth_required_message">To perform this action, you must log in to your account!</string>
+    <string name="button_sign_in">Login</string>
+    <string name="button_cancel">Cancel</string>
 </resources>
